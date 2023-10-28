@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace MazeGame
 {
@@ -58,25 +57,26 @@ namespace MazeGame
 
         // Entitiy manager
 
-        public bool SpawnPlayer(Player player)
+        public bool SpawnPlayer(Player player, Mutex mutex)
         {
-            return PlaceRandom(player);
+            return PlaceRandom(player, mutex);
         }
 
-        private bool PlaceRandom(Entitiy entitiy)
+        private bool PlaceRandom(Entitiy entitiy, Mutex mutex)
         {
-            bool[,] realMask = new bool[MAX_Y,MAX_X];
+            bool[,] realMask = new bool[MAX_Y, MAX_X];
             int realCount = m_countOfPassableTiles;
 
             for (int y = 0; y < MAX_Y; ++y)
                 for (int x = 0; x < MAX_X; ++x)
-                    realMask[y,x] = m_maskOfPassability[y,x];
+                    realMask[y, x] = m_maskOfPassability[y, x];
 
-            foreach(Entitiy existedEntity in m_listOfEntities)
-            {
-                realMask[existedEntity.GetY(), existedEntity.GetX()] = false;
-                realCount--;
-            }
+            foreach (Entitiy existedEntity in m_listOfEntities)
+                if (realMask[existedEntity.GetY(), existedEntity.GetX()])
+                {
+                    realMask[existedEntity.GetY(), existedEntity.GetX()] = false;
+                    realCount--;
+                }
 
             if (realCount == 0)
                 return false;
@@ -90,14 +90,15 @@ namespace MazeGame
             } while (!realMask[yPos, xPos]);
 
             entitiy.SetPosition(xPos, yPos);
+            mutex.WaitOne();
             m_listOfEntities.AddLast(entitiy);
-
+            mutex.ReleaseMutex();
             return true;
         }
 
         // Renderer
 
-        public void Render()
+        public void Render(Mutex mutex)
         {
             Console.CursorVisible = false;
 
@@ -111,10 +112,12 @@ namespace MazeGame
             }
 
             StringBuilder stringBuilder = new StringBuilder(output);
+            mutex.WaitOne();
             foreach (Entitiy entitiy in m_listOfEntities)
             {
                 stringBuilder[entitiy.GetX() + entitiy.GetY() * (MAX_X + 1)] = entitiy.GetImage().GetData();
             }
+            mutex.ReleaseMutex();
             output = stringBuilder.ToString();
 
             Console.SetCursorPosition(0, 0);

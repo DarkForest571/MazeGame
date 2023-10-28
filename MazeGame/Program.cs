@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading;
 using MazeGame;
 
 const int MAX_X = 40;
@@ -6,14 +7,13 @@ const int MAX_Y = 20;
 const int framesPerSecond = 50;
 const double msPerFrame = 1000.0 / framesPerSecond;
 
-Image wallImage = new Image('#', ConsoleColor.White, ConsoleColor.Black);
+Image wallImage = new Image('#');
 Image spaceImage = new Image('.');
 Image playerImage = new Image('☻');
 
-World world = new World(MAX_Y, MAX_X, wallImage, spaceImage);
+Mutex mutex = new Mutex(false);
 
-ConsoleColor fgColor = ConsoleColor.White;
-ConsoleColor bgColor = ConsoleColor.Black;
+World world = new World(MAX_Y, MAX_X, wallImage, spaceImage);
 
 Thread inputThread = new Thread(InputProcessing);
 inputThread.Start();
@@ -32,16 +32,11 @@ while (inputThread.IsAlive)
 
         if (frame++ % framesPerSecond == 0)
         {
-            //wallImage.SwapData(spaceImage);
-            //(bgColor, fgColor) = (fgColor, bgColor);
+            wallImage.SwapData(spaceImage);
         }
 
-        Console.BackgroundColor = bgColor;
-        Console.ForegroundColor = fgColor;
+        world.Render(mutex);
 
-        world.Render();
-
-        Console.ResetColor();
         Console.WriteLine("{0:F3} FPS", ((float)deltaTicks / (float)(timeBuffer + timeSnap)) * framesPerSecond);
         Console.WriteLine("{0,-9} microseconds per frame", (timeBuffer + timeSnap) / 10);
         Console.WriteLine("{0,-20}", new string('|', (frame % framesPerSecond) * 20 / framesPerSecond));
@@ -63,7 +58,7 @@ void InputProcessing()
         switch (key.Key)
         {
             case ConsoleKey.C:
-                world.SpawnPlayer(new Player(playerImage));
+                world.SpawnPlayer(new Player(playerImage), mutex);
                 break;
             case ConsoleKey.Enter:
                 break;
