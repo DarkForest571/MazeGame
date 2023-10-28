@@ -12,15 +12,18 @@ namespace MazeGame
         private bool[,] m_maskOfPassability;
         private int m_countOfPassableTiles;
 
-        private LinkedList<Entitiy> m_listOfEntities = new LinkedList<Entitiy>();
+        private Entitiy[,] m_mapOfEntities;
+        private int m_countOfEntities;
 
         public World(int ySize, int xSize, Image wallImage, Image spaceImage)
         {
             MAX_Y = ySize;
             MAX_X = xSize;
             m_map = new Tile[MAX_Y, MAX_X];
+            m_mapOfEntities = new Entitiy[MAX_Y, MAX_X];
             m_maskOfPassability = new bool[MAX_Y, MAX_X];
             m_countOfPassableTiles = 0;
+            m_countOfEntities = 0;
 
             Generate(wallImage, spaceImage);
             RefreshMask();
@@ -64,19 +67,7 @@ namespace MazeGame
 
         private bool PlaceRandom(Entitiy entitiy, Mutex mutex)
         {
-            bool[,] realMask = new bool[MAX_Y, MAX_X];
-            int realCount = m_countOfPassableTiles;
-
-            for (int y = 0; y < MAX_Y; ++y)
-                for (int x = 0; x < MAX_X; ++x)
-                    realMask[y, x] = m_maskOfPassability[y, x];
-
-            foreach (Entitiy existedEntity in m_listOfEntities)
-                if (realMask[existedEntity.GetY(), existedEntity.GetX()])
-                {
-                    realMask[existedEntity.GetY(), existedEntity.GetX()] = false;
-                    realCount--;
-                }
+            int realCount = m_countOfPassableTiles - m_countOfEntities;
 
             if (realCount == 0)
                 return false;
@@ -87,11 +78,11 @@ namespace MazeGame
             {
                 xPos = rnd.Next(MAX_X);
                 yPos = rnd.Next(MAX_Y);
-            } while (!realMask[yPos, xPos]);
+            } while (!m_maskOfPassability[yPos, xPos] || m_mapOfEntities[yPos, xPos] != null);
 
             entitiy.SetPosition(xPos, yPos);
             mutex.WaitOne();
-            m_listOfEntities.AddLast(entitiy);
+            m_mapOfEntities[yPos,xPos] = entitiy;
             mutex.ReleaseMutex();
             return true;
         }
@@ -104,21 +95,17 @@ namespace MazeGame
 
             string output = "";
 
+            mutex.WaitOne();
             for (int yCoord = 0; yCoord < MAX_Y; ++yCoord)
             {
                 for (int xCoord = 0; xCoord < MAX_X; ++xCoord)
-                    output += GetMap()[yCoord, xCoord].GetImage().GetData();
+                    if (m_mapOfEntities[yCoord, xCoord] != null)
+                        output += m_mapOfEntities[yCoord, xCoord].GetImage().GetData();
+                    else
+                        output += m_map[yCoord, xCoord].GetImage().GetData();
                 output += '\n';
             }
-
-            StringBuilder stringBuilder = new StringBuilder(output);
-            mutex.WaitOne();
-            foreach (Entitiy entitiy in m_listOfEntities)
-            {
-                stringBuilder[entitiy.GetX() + entitiy.GetY() * (MAX_X + 1)] = entitiy.GetImage().GetData();
-            }
             mutex.ReleaseMutex();
-            output = stringBuilder.ToString();
 
             Console.SetCursorPosition(0, 0);
             Console.WriteLine(output);
