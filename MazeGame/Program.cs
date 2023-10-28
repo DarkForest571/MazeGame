@@ -1,49 +1,48 @@
 ﻿using System.Diagnostics;
-using System.Threading;
 using MazeGame;
+using MazeGame.Core;
 
 const int MAX_X = 40;
 const int MAX_Y = 20;
 const int framesPerSecond = 50;
 const double msPerFrame = 1000.0 / framesPerSecond;
+const long deltaTicks = (long)(msPerFrame * 10000);
 
 Image wallImage = new Image('#');
 Image spaceImage = new Image('.');
 Image playerImage = new Image('☻');
 
-Mutex mutex = new Mutex(false);
-
-World world = new World(MAX_Y, MAX_X, wallImage, spaceImage);
+World world = new World(MAX_X, MAX_Y);
+world.Generate(wallImage, spaceImage);
 
 Thread inputThread = new Thread(InputProcessing);
 inputThread.Start();
 
-int frame = 0;
-long timeBuffer = 0, timeSnap;
+long frame = 0;
+long lag;
 
-const long deltaTicks = (long)(msPerFrame * 10000);
 Stopwatch stopwatch = Stopwatch.StartNew();
 while (inputThread.IsAlive)
 {
-    timeSnap = stopwatch.ElapsedTicks;
-    if (timeBuffer + timeSnap >= deltaTicks)
-    {
-        stopwatch.Restart();
+    lag = stopwatch.ElapsedTicks;
 
+    if (lag >= deltaTicks)
+        stopwatch.Restart();
+    while (lag >= deltaTicks)
+    {
         if (frame++ % framesPerSecond == 0)
         {
-            wallImage.SwapData(spaceImage);
+            //
         }
-
-        world.Render(mutex);
-
-        Console.WriteLine("{0:F3} FPS", ((float)deltaTicks / (float)(timeBuffer + timeSnap)) * framesPerSecond);
-        Console.WriteLine("{0,-9} microseconds per frame", (timeBuffer + timeSnap) / 10);
-        Console.WriteLine("{0,-20}", new string('|', (frame % framesPerSecond) * 20 / framesPerSecond));
-        Console.WriteLine("{0,9}", timeBuffer);
+        Console.SetCursorPosition(0, MAX_Y);
+        Console.WriteLine("{0:F3} FPS", ((float)deltaTicks / (float)lag) * framesPerSecond);
+        Console.WriteLine("{0,-9} microseconds per frame", lag / 10);
+        Console.WriteLine("{0,-20}", new string('|', (int)((frame % framesPerSecond) * 20 / framesPerSecond)));
         Console.WriteLine(frame);
-        timeBuffer = timeBuffer + timeSnap - deltaTicks;
+        lag -= deltaTicks;
     }
+
+    world.Render();
 }
 Console.Clear();
 
@@ -58,7 +57,11 @@ void InputProcessing()
         switch (key.Key)
         {
             case ConsoleKey.C:
-                world.SpawnPlayer(new Player(playerImage), mutex);
+                Random rnd = Random.Shared;
+                Vector2 position = new Vector2();
+
+                do (position.X, position.Y) = (rnd.Next(MAX_X), rnd.Next(MAX_Y));
+                while (!world.PlaceEntity(new Player(playerImage, position)));
                 break;
             case ConsoleKey.Enter:
                 break;
