@@ -21,6 +21,7 @@ inputThread.Start();
 long frame = 0;
 long lag;
 
+DateTime startTime = DateTime.Now;
 Stopwatch stopwatch = Stopwatch.StartNew();
 while (inputThread.IsAlive)
 {
@@ -30,15 +31,17 @@ while (inputThread.IsAlive)
         stopwatch.Restart();
     while (lag >= deltaTicks)
     {
-        if (frame++ % framesPerSecond == 0)
+        //if (frame++ % framesPerSecond == 0)
+        if (frame++ == framesPerSecond * 5)
         {
-            //
+            Thread.Sleep(5000);
         }
         Console.SetCursorPosition(0, MAX_Y);
         Console.WriteLine("{0:F3} FPS", ((float)deltaTicks / (float)lag) * framesPerSecond);
         Console.WriteLine("{0,-9} microseconds per frame", lag / 10);
         Console.WriteLine("{0,-20}", new string('|', (int)((frame % framesPerSecond) * 20 / framesPerSecond)));
-        Console.WriteLine(frame);
+        Console.WriteLine("{0,2}", (frame / framesPerSecond) % 60);
+        Console.WriteLine((DateTime.Now - startTime).ToString("ss"));
         lag -= deltaTicks;
     }
 
