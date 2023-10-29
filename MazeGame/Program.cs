@@ -2,72 +2,78 @@
 using MazeGame;
 using MazeGame.Core;
 
-const int MAX_X = 40;
-const int MAX_Y = 20;
-const int framesPerSecond = 50;
-const double msPerFrame = 1000.0 / framesPerSecond;
-const long deltaTicks = (long)(msPerFrame * 10000);
-
-Image wallImage = new Image('#');
-Image spaceImage = new Image('.');
-Image playerImage = new Image('☻');
-
-World world = new World(MAX_X, MAX_Y);
-world.Generate(wallImage, spaceImage);
-
-Thread inputThread = new Thread(InputProcessing);
-inputThread.Start();
-
-long frame = 0;
-long lag;
-
-DateTime startTime = DateTime.Now;
-Stopwatch stopwatch = Stopwatch.StartNew();
-while (inputThread.IsAlive)
+internal class Program
 {
-    lag = stopwatch.ElapsedTicks;
+    static bool run = true;
 
-    if (lag >= deltaTicks)
-        stopwatch.Restart();
-    while (lag >= deltaTicks)
+    static void Main(string[] args)
     {
-        //if (frame++ % framesPerSecond == 0)
-        if (frame++ == framesPerSecond * 5)
+        const int MAX_X = 40;
+        const int MAX_Y = 20;
+        const int framesPerSecond = 50;
+        const double msPerFrame = 1000.0 / framesPerSecond;
+        const long deltaMicroseconds = (long)(msPerFrame * 10000);
+
+        Image wallImage = new Image('#');
+        Image spaceImage = new Image('.');
+        Image playerImage = new Image('☻');
+
+        World world = new World(MAX_X, MAX_Y);
+        world.Generate(wallImage, spaceImage);
+
+        long frame = 0;
+        long lag;
+
+        DateTime startTime = DateTime.Now;
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        while (run)
         {
-            Thread.Sleep(5000);
+            // InputProcessing
+            InputProcessing();
+
+            lag = stopwatch.ElapsedTicks;
+
+            if (lag >= deltaMicroseconds)
+            {
+                stopwatch.Restart();
+                if (frame++ % framesPerSecond == 0)
+                {
+                    //
+                }
+
+                // Physics
+
+                // Logs
+                Console.SetCursorPosition(0, MAX_Y);
+                Console.WriteLine("{0:F3} FPS", deltaMicroseconds / (float)lag * framesPerSecond);
+                Console.WriteLine("{0,-9} mics/frame", lag / 10);
+                Console.WriteLine("{0,-20}", new string('|', (int)(frame % framesPerSecond * 20 / framesPerSecond)));
+
+                // Render
+                world.Render();
+            }
         }
-        Console.SetCursorPosition(0, MAX_Y);
-        Console.WriteLine("{0:F3} FPS", ((float)deltaTicks / (float)lag) * framesPerSecond);
-        Console.WriteLine("{0,-9} microseconds per frame", lag / 10);
-        Console.WriteLine("{0,-20}", new string('|', (int)((frame % framesPerSecond) * 20 / framesPerSecond)));
-        Console.WriteLine("{0,2}", (frame / framesPerSecond) % 60);
-        Console.WriteLine((DateTime.Now - startTime).ToString("ss"));
-        lag -= deltaTicks;
-    }
+        Console.Clear();
 
-    world.Render();
-}
-Console.Clear();
 
-void InputProcessing()
-{
-    ConsoleKeyInfo key = new ConsoleKeyInfo();
-
-    while (key.Key != ConsoleKey.Escape)
-    {
-        key = Console.ReadKey(true);
-
-        switch (key.Key)
+        async void InputProcessing()
         {
-            case ConsoleKey.C:
-                Random rnd = Random.Shared;
-                Vector2 position = new Vector2();
+            ConsoleKeyInfo consoleKeyInfo = new ConsoleKeyInfo();
+            await Task.Run(() => { consoleKeyInfo = Console.ReadKey(true); });
 
-                do (position.X, position.Y) = (rnd.Next(MAX_X), rnd.Next(MAX_Y));
-                while (!world.PlaceEntity(new Player(playerImage, position)));
-                break;
-            case ConsoleKey.Enter:
-                break;
+            switch (consoleKeyInfo.Key)
+            {
+                case ConsoleKey.C:
+                    Random rnd = Random.Shared;
+                    Vector2 position = new Vector2();
+
+                    do (position.X, position.Y) = (rnd.Next(MAX_X), rnd.Next(MAX_Y));
+                    while (!world.PlaceEntity(new Player(playerImage, position)));
+                    break;
+                case ConsoleKey.Escape:
+                    run = false;
+                    break;
+            }
         }
     }
 }
