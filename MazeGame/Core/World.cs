@@ -1,4 +1,6 @@
-﻿namespace MazeGame.Core
+﻿using MazeGame.Graphics;
+
+namespace MazeGame.Core
 {
     sealed class World
     {

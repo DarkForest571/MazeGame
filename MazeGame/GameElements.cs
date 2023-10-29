@@ -1,4 +1,5 @@
 ﻿using MazeGame.Core;
+using MazeGame.Graphics;
 
 namespace MazeGame
 {

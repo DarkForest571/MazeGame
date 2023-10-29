@@ -1,4 +1,6 @@
-﻿namespace MazeGame.Core
+﻿using MazeGame.Graphics;
+
+namespace MazeGame.Core
 {
     abstract class Tile : GameObject
     {
@@ -14,7 +16,7 @@
             _moveCost = moveCost;
         }
 
-        public int MoveCost { get => _moveCost;  }
+        public int MoveCost { get => _moveCost; }
     }
 
     abstract class ImpassableTile : Tile

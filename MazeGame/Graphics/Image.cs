@@ -1,4 +1,4 @@
-﻿namespace MazeGame
+﻿namespace MazeGame.Graphics
 {
     class Image
     {

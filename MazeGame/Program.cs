@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using MazeGame;
 using MazeGame.Core;
+using MazeGame.Graphics;
 
 internal class Program
 {
@@ -24,7 +24,6 @@ internal class Program
         long frame = 0;
         long lag;
 
-        DateTime startTime = DateTime.Now;
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (run)
         {
