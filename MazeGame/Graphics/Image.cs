@@ -1,10 +1,12 @@
 ﻿namespace MazeGame.Graphics
 {
-    class Image
+    interface Image { }
+
+    class CharImage<Type> : Image
     {
         private char _value;
 
-        public Image(char value = '?')
+        public CharImage(char value)
         {
             _value = value;
         }
