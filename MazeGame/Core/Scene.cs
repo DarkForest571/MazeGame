@@ -4,37 +4,24 @@ namespace MazeGame.Core
 {
     sealed class Scene
     {
-        public readonly int WIDTH;
-        public readonly int HEIGHT;
-
-        private Tile[,] _map;
-        private LinkedList<Entity> _entities;
-
+        private World _world;
         private Generator _generator;
 
-        public Scene(int width, int height, Generator generator)
+        public Scene(Vector2 worldSize, Generator generator)
         {
-            (WIDTH, HEIGHT) = (width, height);
+            _world = new World(worldSize);
             _generator = generator;
-
-            _map = new Tile[WIDTH, HEIGHT];
-            _entities = new LinkedList<Entity>();
         }
 
-        public Tile? TileAt(Vector2 position)
-        {
-            if (position.X >= 0 && position.X < WIDTH &&
-                position.Y >= 0 && position.Y < HEIGHT)
-            {
-                return _map[position.X, position.Y];
-            }
-            else
-                return null;
-        }
 
         public void CreateMap()
         {
-            _map = _generator.Generate(WIDTH, HEIGHT);
+            _generator.Generate(_world);
+        }
+
+        public void RenderScene()
+        {
+
         }
 
         // Entitiy manager
@@ -48,9 +35,5 @@ namespace MazeGame.Core
             }
             return false;
         }
-
-        // Renderer
-
-
     }
 }
