@@ -2,7 +2,7 @@
 {
     interface Generator
     {
-        public Tile[,] Generate(int width, int height);
+        public void Generate(World world);
     }
 
     class DefaultGenerator : Generator
@@ -16,20 +16,19 @@
             _filler = filler;
         }
 
-        public virtual Tile[,] Generate(int width, int height)
+        public virtual void Generate(World world)
         {
-            Tile[,] map = new Tile[height, width];
+            int maxX = world.Size.X;
+            int maxY = world.Size.Y;
 
-            for (int y = 0; y < height; ++y)
-                map[y, 0] = map[y, width - 1] = _border;
-            for (int x = 1, end = width - 1; x < end; ++x)
-                map[0, x] = map[height - 1, x] = _border;
+            for (int x = 0; x < maxX; ++x)
+                world.Map[x, 0] = world.Map[x, maxY - 1] = _border;
+            for (int y = 1, end = maxY - 1; y < end; ++y)
+                world.Map[0, y] = world.Map[maxX - 1, y] = _border;
 
-            for (int y = 1, yend = height - 1; y < yend; ++y)
-                for (int x = 1, xend = width - 1; x < xend; ++x)
-                    map[y, x] = _filler;
-
-            return map;
+            for (int y = 1, yend = maxY - 1; y < yend; ++y)
+                for (int x = 1, xend = maxX - 1; x < xend; ++x)
+                    world.Map[x, y] = _filler;
         }
     }
 
@@ -37,13 +36,11 @@
     {
         public MazeGenerator(Tile wall, Tile filler) : base(wall, filler) { }
 
-        public override Tile[,] Generate(int width, int height)
+        public override void Generate(World world)
         {
-            Tile[,] map = base.Generate(width, height);
+            base.Generate(world);
 
             // TODO Make maze here
-
-            return map;
         }
     }
 }

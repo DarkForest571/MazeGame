@@ -3,7 +3,7 @@
     class World
     {
         private Vector2 _worldSize;
-        
+
         private Tile[,] _map;
         private LinkedList<Entity> _entities;
 
@@ -13,6 +13,10 @@
             _map = new Tile[worldSize.X, worldSize.Y];
             _entities = new LinkedList<Entity>();
         }
+
+        public Vector2 Size { get => _worldSize; }
+
+        public Tile[,] Map { get => _map; }
 
         public Tile? TileAt(Vector2 position)
         {
