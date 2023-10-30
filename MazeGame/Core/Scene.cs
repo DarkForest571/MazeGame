@@ -14,7 +14,7 @@ namespace MazeGame.Core
         }
 
 
-        public void CreateMap()
+        public void CreateWorld()
         {
             _generator.Generate(_world);
         }
@@ -26,14 +26,14 @@ namespace MazeGame.Core
 
         // Entitiy manager
 
-        public bool PlaceEntity(Entity entity)
-        {
-            if (TileAt(entity.Position) is PassableTile)
-            {
-                _entities.AddLast(entity);
-                return true;
-            }
-            return false;
-        }
+        //public bool PlaceEntity(Entity entity)
+        //{
+        //    if (TileAt(entity.Position) is PassableTile)
+        //    {
+        //        _entities.AddLast(entity);
+        //        return true;
+        //    }
+        //    return false;
+        //}
     }
 }

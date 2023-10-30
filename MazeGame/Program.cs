@@ -24,8 +24,8 @@ internal class Program
 
         Generator generator = new DefaultGenerator(wallTile,spaceTile);
 
-        Scene world = new Scene(MAX_X, MAX_Y, generator);
-        world.CreateMap();
+        Scene scene = new Scene(new Vector2(MAX_X, MAX_Y), generator);
+        scene.CreateWorld();
 
         long frame = 0;
         long lag;
@@ -72,11 +72,11 @@ internal class Program
             switch (consoleKeyInfo.Key)
             {
                 case ConsoleKey.C:
-                    Random rnd = Random.Shared;
-                    Vector2 position = new Vector2();
+                    //Random rnd = Random.Shared;
+                    //Vector2 position = new Vector2();
 
-                    do (position.X, position.Y) = (rnd.Next(MAX_X), rnd.Next(MAX_Y));
-                    while (!world.PlaceEntity(new Player(playerImage, position)));
+                    //do (position.X, position.Y) = (rnd.Next(MAX_X), rnd.Next(MAX_Y));
+                    //while (!world.PlaceEntity(new Player(playerImage, position)));
                     break;
                 case ConsoleKey.Escape:
                     run = false;
