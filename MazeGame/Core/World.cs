@@ -16,11 +16,9 @@
 
         public Vector2 Size { get => _worldSize; }
 
-        //public Tile[,] Map { get => _map; }
-
         public ref Tile TileAt(Vector2 position)
         {
-            if (position.IsPositive() && position.X < _worldSize.X && position.Y < _worldSize.Y)
+            if (position > Vector2.Zero && position < _worldSize)
             {
                 return ref _map[position.X, position.Y];
             }

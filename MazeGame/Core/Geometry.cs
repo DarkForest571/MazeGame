@@ -9,8 +9,13 @@
             (X, Y) = (x, y);
         }
 
-        public bool IsPositive() => X >= 0 && Y >= 0;
+        public static Vector2 Zero { get => new Vector2(0, 0); }
+
+        public static bool operator <(Vector2 left, Vector2 right) => left.X < right.X && left.Y < right.Y;
+
+        public static bool operator >(Vector2 left, Vector2 right) => left.X > right.X && left.Y > right.Y;
     }
+
 
     struct Square
     {

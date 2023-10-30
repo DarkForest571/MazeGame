@@ -16,7 +16,7 @@ namespace MazeGame.Graphics
         public Vector2 Position
         {
             get => _frame.Position;
-            set => _frame.Position = value.IsPositive() ? value : new Vector2();
+            set => _frame.Position = value > Vector2.Zero ? value : new Vector2();
         }
     }
 
