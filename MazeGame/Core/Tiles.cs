@@ -4,14 +4,14 @@ namespace MazeGame.Core
 {
     abstract class Tile : GameObject
     {
-        protected Tile(Image image) : base(image) { }
+        protected Tile(IImage image) : base(image) { }
     }
 
     abstract class PassableTile : Tile
     {
         private readonly int _moveCost;
 
-        protected PassableTile(Image image, int moveCost) : base(image)
+        protected PassableTile(IImage image, int moveCost) : base(image)
         {
             _moveCost = moveCost;
         }
@@ -23,7 +23,7 @@ namespace MazeGame.Core
     {
         private int _durability;
 
-        protected ImpassableTile(Image image, int durability) : base(image)
+        protected ImpassableTile(IImage image, int durability) : base(image)
         {
             _durability = durability;
         }

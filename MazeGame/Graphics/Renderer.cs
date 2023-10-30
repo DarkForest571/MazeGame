@@ -4,35 +4,40 @@ namespace MazeGame.Graphics
 {
     abstract class BasicRenderer
     {
-        protected readonly int _width;
-        protected readonly int _height;
+        private Square _frame;
 
-        protected BasicRenderer(int width, int height)
+        protected BasicRenderer(Vector2 size, Vector2 position = new Vector2())
         {
-            _width = width;
-            _height = height;
+            _frame = new Square(size, position);
         }
 
-        public abstract void Render();
+        public Vector2 Size { get => _frame.Size; }
+
+        public Vector2 Position
+        {
+            get => _frame.Position;
+            set => _frame.Position = value.IsPositive() ? value : new Vector2();
+        }
     }
 
-    class SceneRenderer : BasicRenderer
+    abstract class SceneRenderer : BasicRenderer
     {
-        private Image[,] _buffer;
+        protected IImage[,] _buffer;
 
-        public SceneRenderer(int width, int height) : base(width, height)
+        protected SceneRenderer(Vector2 size, Vector2 position = new Vector2()) : base(size, position)
         {
-            _buffer = new Image[height, height];
+            _buffer = new IImage[size.X, size.Y];
         }
 
-        public override void Render()
+        public abstract void Render(Tile[,] map, List<Entity> entities);
+    }
+
+    class UIRenderer : BasicRenderer
+    {
+        public UIRenderer(Vector2 size, Vector2 position = new Vector2()) : base(size, position)
         {
 
         }
 
-        private void Render(Tile[,] map, List<Entity> entities)
-        {
-
-        }
     }
 }

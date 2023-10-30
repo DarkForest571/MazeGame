@@ -15,9 +15,9 @@ internal class Program
         const double msPerFrame = 1000.0 / framesPerSecond;
         const long deltaMicroseconds = (long)(msPerFrame * 10000);
 
-        Image wallImage = new Image('#');
-        Image spaceImage = new Image('.');
-        Image playerImage = new Image('☻');
+        IImage wallImage = new Image<char>('#');
+        IImage spaceImage = new Image<char>('.');
+        IImage playerImage = new Image<char>('☻');
 
         Wall wallTile = new Wall(wallImage);
         Space spaceTile = new Space(spaceImage);
@@ -57,7 +57,7 @@ internal class Program
                 Console.WriteLine("{0,-20}", new string('|', (int)(frame % framesPerSecond * 20 / framesPerSecond)));
 
                 // Render
-                world.Render();
+                //world.Render();
             }
         }
         Console.Clear();
