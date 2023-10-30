@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using MazeGame.Core;
 using MazeGame.Graphics;
+using MazeGame;
 
 internal class Program
 {
@@ -18,17 +19,23 @@ internal class Program
         Image spaceImage = new Image('.');
         Image playerImage = new Image('☻');
 
-        World world = new World(MAX_X, MAX_Y);
-        world.Generate(wallImage, spaceImage);
+        Wall wallTile = new Wall(wallImage);
+        Space spaceTile = new Space(spaceImage);
+
+        Generator generator = new DefaultGenerator(wallTile,spaceTile);
+
+        Scene world = new Scene(MAX_X, MAX_Y, generator);
+        world.CreateMap();
 
         long frame = 0;
         long lag;
+
+        //InputProcessing();
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (run)
         {
             // InputProcessing
-            InputProcessing();
 
             lag = stopwatch.ElapsedTicks;
 
@@ -42,6 +49,7 @@ internal class Program
 
                 // Physics
 
+
                 // Logs
                 Console.SetCursorPosition(0, MAX_Y);
                 Console.WriteLine("{0:F3} FPS", deltaMicroseconds / (float)lag * framesPerSecond);
@@ -53,6 +61,7 @@ internal class Program
             }
         }
         Console.Clear();
+
 
 
         async void InputProcessing()

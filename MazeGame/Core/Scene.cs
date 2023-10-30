@@ -2,7 +2,7 @@
 
 namespace MazeGame.Core
 {
-    sealed class World
+    sealed class Scene
     {
         public readonly int MAX_X;
         public readonly int MAX_Y;
@@ -10,11 +10,15 @@ namespace MazeGame.Core
         private Tile[,] _map;
         private LinkedList<Entity> _entities;
 
+        private Generator _generator;
+
         private char[] _frameBuffer;
 
-        public World(int xSize, int ySize)
+        public Scene(int xSize, int ySize, Generator generator)
         {
             (MAX_X, MAX_Y) = (xSize, ySize);
+            _generator = generator;
+
             _map = new Tile[MAX_Y, MAX_X];
             _entities = new LinkedList<Entity>();
             _frameBuffer = new char[(MAX_X + 1) * MAX_Y];
@@ -39,18 +43,9 @@ namespace MazeGame.Core
             return ref _frameBuffer[(position.Y * (MAX_X + 1)) + position.X];
         }
 
-        // Generator
-
-        public void Generate(Image wallImage, Image spaceImage)
+        public void CreateMap()
         {
-            for (int y = 0; y < MAX_Y; ++y)
-                _map[y, 0] = _map[y, MAX_X - 1] = new Wall(wallImage);
-            for (int x = 1, end = MAX_X - 1; x < end; ++x)
-                _map[0, x] = _map[MAX_Y - 1, x] = new Wall(wallImage);
-
-            for (int y = 1, yend = MAX_Y - 1; y < yend; ++y)
-                for (int x = 1, xend = MAX_X - 1; x < xend; ++x)
-                    _map[y, x] = new Space(spaceImage);
+            _map = _generator.Generate(MAX_X, MAX_Y);
         }
 
         // Entitiy manager
