@@ -22,13 +22,19 @@
             int maxY = world.Size.Y;
 
             for (int x = 0; x < maxX; ++x)
-                world.TileAt(x, 0) = world.TileAt(x, maxY - 1) = _border;
+            {
+                world.SetTile(x, 0, _border);
+                world.SetTile(x, maxY - 1, _border);
+            }
             for (int y = 1, end = maxY - 1; y < end; ++y)
-                world.TileAt(0, y) = world.TileAt(maxX - 1, y) = _border;
+            {
+                world.SetTile(0, y, _border);
+                world.SetTile(maxX - 1, y, _border);
+            }
 
             for (int y = 1, yend = maxY - 1; y < yend; ++y)
                 for (int x = 1, xend = maxX - 1; x < xend; ++x)
-                    world.TileAt(x, y) = _filler;
+                    world.SetTile(x, y, _filler);
         }
     }
 

@@ -16,16 +16,24 @@
 
         public Vector2 Size { get => _worldSize; }
 
-        public ref Tile TileAt(Vector2 position)
+        public Tile GetTile(int x, int y) => GetTile(new Vector2(x, y));
+
+        public Tile GetTile(Vector2 position)
         {
             if (position > Vector2.Zero && position < _worldSize)
-            {
-                return ref _map[position.X, position.Y];
-            }
+                return _map[position.X, position.Y];
             else
                 throw new ArgumentException();
         }
 
-        public ref Tile TileAt(int x, int y) => ref TileAt(new Vector2(x, y));
+        public void SetTile(int x, int y, Tile tile) => SetTile(new Vector2(x, y), tile);
+
+        public void SetTile(Vector2 position, Tile tile)
+        {
+            if (position >= Vector2.Zero && position < _worldSize)
+                _map[position.X, position.Y] = tile;
+            else
+                throw new ArgumentException();
+        }
     }
 }

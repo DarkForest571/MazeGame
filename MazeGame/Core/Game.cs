@@ -2,12 +2,12 @@
 
 namespace MazeGame.Core
 {
-    sealed class Scene
+    sealed class Game
     {
         private World _world;
         private Generator _generator;
 
-        public Scene(Vector2 worldSize, Generator generator)
+        public Game(Vector2 worldSize, Generator generator)
         {
             _world = new World(worldSize);
             _generator = generator;

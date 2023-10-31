@@ -14,6 +14,10 @@
         public static bool operator <(Vector2 left, Vector2 right) => left.X < right.X && left.Y < right.Y;
 
         public static bool operator >(Vector2 left, Vector2 right) => left.X > right.X && left.Y > right.Y;
+
+        public static bool operator <=(Vector2 left, Vector2 right) => left.X <= right.X && left.Y <= right.Y;
+
+        public static bool operator >=(Vector2 left, Vector2 right) => left.X >= right.X && left.Y >= right.Y;
     }
 
 

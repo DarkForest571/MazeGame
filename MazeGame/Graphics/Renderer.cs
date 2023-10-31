@@ -20,16 +20,16 @@ namespace MazeGame.Graphics
         }
     }
 
-    abstract class SceneRenderer : BasicRenderer
+    abstract class WorldRenderer : BasicRenderer
     {
         protected IImage[,] _buffer;
 
-        protected SceneRenderer(Vector2 size, Vector2 position = new Vector2()) : base(size, position)
+        protected WorldRenderer(Vector2 size, Vector2 position = new Vector2()) : base(size, position)
         {
             _buffer = new IImage[size.X, size.Y];
         }
 
-        public abstract void Render(Tile[,] map, List<Entity> entities);
+        public abstract void Render(World world);
     }
 
     class UIRenderer : BasicRenderer

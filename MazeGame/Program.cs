@@ -22,9 +22,9 @@ internal class Program
         Wall wallTile = new Wall(wallImage);
         Space spaceTile = new Space(spaceImage);
 
-        Generator generator = new DefaultGenerator(wallTile,spaceTile);
+        Generator generator = new MazeGenerator(wallTile,spaceTile);
 
-        Scene scene = new Scene(new Vector2(MAX_X, MAX_Y), generator);
+        Game scene = new Game(new Vector2(MAX_X, MAX_Y), generator);
         scene.CreateWorld();
 
         long frame = 0;
