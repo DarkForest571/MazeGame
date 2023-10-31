@@ -15,9 +15,9 @@ internal class Program
         const double msPerFrame = 1000.0 / framesPerSecond;
         const long deltaMicroseconds = (long)(msPerFrame * 10000);
 
-        IImage wallImage = new Image<char>('#');
-        IImage spaceImage = new Image<char>('.');
-        IImage playerImage = new Image<char>('☻');
+        Image wallImage = new Image('#');
+        Image spaceImage = new Image('.');
+        Image playerImage = new Image('☻');
 
         Wall wallTile = new Wall(wallImage);
         Space spaceTile = new Space(spaceImage);
@@ -29,9 +29,6 @@ internal class Program
 
         long frame = 0;
         long lag;
-
-        //InputProcessing();
-        Mutex m;
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (run)

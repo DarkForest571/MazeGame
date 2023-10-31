@@ -1,4 +1,6 @@
-﻿namespace MazeGame.Core
+﻿using System.Collections.ObjectModel;
+
+namespace MazeGame.Core
 {
     class World
     {
@@ -20,34 +22,20 @@
 
         public Vector2 Size { get => _worldSize; }
 
-        public Tile GetTile(int x, int y) => GetTile(new Vector2(x, y));
-
-        public Tile GetTile(Vector2 position)
+        public Tile this[int x, int y]
         {
-            if (position >= Vector2.Zero && position < _worldSize)
-                return _map[position.X, position.Y];
-            else
-                throw new ArgumentException();
+            get => _map[x, y];
+            set => _map[x, y] = value;
         }
 
-        public void SetTile(int x, int y, Tile tile) => SetTile(new Vector2(x, y), tile);
-
-        public void SetTile(Vector2 position, Tile tile)
+        public Tile this[Vector2 position]
         {
-            if (position >= Vector2.Zero && position < _worldSize)
-                _map[position.X, position.Y] = tile;
-            else
-                throw new ArgumentException();
+            get => _map[position.X, position.Y];
+            set => _map[position.X, position.Y] = value;
         }
 
         public int EntityCount() => _entities.Count;
 
-        public Entity GetEntity(int index)
-        {
-            if (index >= 0 && index < _entities.Count)
-                return _entities[index];
-            else
-                throw new ArgumentException();
-        }
+        public ReadOnlyCollection<Entity> Entities() => _entities.AsReadOnly();
     }
 }

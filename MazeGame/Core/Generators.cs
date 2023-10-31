@@ -7,34 +7,42 @@
 
     class DefaultGenerator : Generator
     {
-        protected Tile _border;
-        protected Tile _filler;
+        protected readonly Tile _border;
+        protected readonly Tile _filler;
 
         public DefaultGenerator(Tile border, Tile filler)
         {
-            _border = border;
-            _filler = filler;
+            (_border, _filler) = (border, filler);
         }
 
         public virtual void Generate(World world)
         {
-            int maxX = world.Size.X;
-            int maxY = world.Size.Y;
+            HorizontalLine(world, _border, new(0, 0), world.Size.X);
+            HorizontalLine(world, _border, new(0, world.Size.Y - 1), world.Size.X);
 
-            for (int x = 0; x < maxX; ++x)
-            {
-                world.SetTile(x, 0, _border);
-                world.SetTile(x, maxY - 1, _border);
-            }
-            for (int y = 1, end = maxY - 1; y < end; ++y)
-            {
-                world.SetTile(0, y, _border);
-                world.SetTile(maxX - 1, y, _border);
-            }
+            VerticalLine(world, _border, new(0, 1), world.Size.Y - 2);
+            VerticalLine(world, _border, new(world.Size.X - 1, 1), world.Size.Y - 2);
 
-            for (int y = 1, yend = maxY - 1; y < yend; ++y)
-                for (int x = 1, xend = maxX - 1; x < xend; ++x)
-                    world.SetTile(x, y, _filler);
+            Fill(world, _filler, new(1, 1), world.Size - new Vector2(1,1));
+        }
+
+        protected void Fill(World world, Tile tile, Vector2 upperLeft, Vector2 bottomRight)
+        {
+            int length = bottomRight.X - upperLeft.X;
+            for (int y = upperLeft.Y, yend = bottomRight.Y; y < yend; ++y)
+                HorizontalLine(world, tile, new(upperLeft.X, y), length);
+        }
+
+        protected void HorizontalLine(World world, Tile tile, Vector2 position, int length)
+        {
+            for (int x = position.X, xend = position.X + length; x < xend; ++x)
+                world[x, position.Y] = tile;
+        }
+
+        protected void VerticalLine(World world, Tile tile, Vector2 position, int length)
+        {
+            for (int y = position.Y, yend = position.Y + length; y < yend; ++y)
+                world[position.X, y] = tile;
         }
     }
 

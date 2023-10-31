@@ -1,16 +1,14 @@
 ﻿namespace MazeGame.Graphics
 {
-    interface IImage { }
-
-    class Image<T> : IImage
+    class Image
     {
-        private T _value;
+        private char _value;
 
-        public Image(T value)
+        public Image(char value)
         {
             _value = value;
         }
 
-        public T Data { get => _value; set => _value = value; }
+        public char Data { get => _value; set => _value = value; }
     }
 }

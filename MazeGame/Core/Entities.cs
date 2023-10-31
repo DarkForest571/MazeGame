@@ -8,7 +8,7 @@ namespace MazeGame.Core
         private int _health;
         private readonly float _moveCoefficient;
 
-        public Entity(IImage image,
+        public Entity(Image image,
                        Vector2 position,
                        int health,
                        float moveCoefficient) : base(image)
@@ -27,7 +27,7 @@ namespace MazeGame.Core
 
     class Player : Entity
     {
-        public Player(IImage image,
+        public Player(Image image,
                        Vector2 position = new Vector2(),
                       int health = 100,
                       float moveCoefficient = 1.0f) : base(image,

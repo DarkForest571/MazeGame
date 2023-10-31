@@ -1,150 +1,147 @@
 ﻿using MazeGame.Core;
+using System.Drawing;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MazeGame.Graphics
 {
     abstract class BasicRenderer
     {
-        private Square _frame;
+        protected Square _frame;
 
-        protected BasicRenderer(Vector2 size, Vector2 position = new Vector2())
+        protected char _clearChar;
+        protected char[] _frameBuffer;
+
+        protected BasicRenderer(Square frame, char clearChar = '?')
         {
-            _frame = new Square(size, position);
+            _frame = frame;
+            _clearChar = clearChar;
+            _frameBuffer = new char[frame.Size.X * frame.Size.Y];
         }
 
-        public Vector2 Size { get => _frame.Size; }
+        public Square Frame { get => _frame; set => _frame = value; }
 
-        public Vector2 Position
+        public Vector2 Size => _frame.Size;
+
+        public Vector2 Position { get => _frame.Position; set => _frame.Position = value; }
+
+        public void Render()
         {
-            get => _frame.Position;
-            set => _frame.Position = value > Vector2.Zero ? value : new Vector2();
-        }
-    }
-
-    abstract class WorldRenderer : BasicRenderer
-    {
-        protected IImage[,] _buffer;
-
-        protected WorldRenderer(Vector2 size, Vector2 position = new Vector2()) : base(size, position)
-        {
-            _buffer = new IImage[size.X, size.Y];
-        }
-
-        public abstract void Render(World world);
-
-        public void FillBuffer(World world)
-        {
-            for (int y = 0; y < Size.Y; ++y)
-            {
-                for (int x = 0; x < Size.X; ++x)
-                {
-                    _buffer[x, y] = world.GetTile(x, y).Image;
-                }
-            }
-
-            for (int i = 0; i < world.EntityCount(); i++)
-            {
-                Entity entity = world.GetEntity(i);
-                _buffer[entity.Position.X, entity.Position.Y] = entity.Image;
-            }
-        }
-    }
-
-    sealed class ConsoleWorldRenderer : WorldRenderer
-    {
-        private char[] _stringBuffer;
-        private char _errorChar;
-
-        public ConsoleWorldRenderer(Vector2 size, Vector2 position = new Vector2(), char errorChar = '?') : base(size, position)
-        {
-            _stringBuffer = new char[size.X];
-            _errorChar = errorChar;
-        }
-
-        public override void Render(World world)
-        {
-            FillBuffer(world);
-
-            Console.CursorVisible = false;
             for (int y = 0; y < Size.Y; ++y)
             {
                 Console.SetCursorPosition(Position.X, Position.Y + y);
-                for (int x = 0; x < Size.X; ++x)
-                {
-                    Image<char>? image = _buffer[x, y] as Image<char>;
-                    if (image != null)
-                        _stringBuffer[x] = image.Data;
-                    else
-                        _stringBuffer[x] = _errorChar;
-                }
-                Console.Write(_stringBuffer);
+                Console.Write(_frameBuffer, y * Size.X, Size.X);
             }
         }
+
+        public void ClearBuffer()
+        {
+            for (int y = 0; y < Size.Y; ++y)
+                for (int x = 0; x < Size.X; ++x)
+                    _frameBuffer[y * Size.X + x] = _clearChar;
+        }
     }
 
-    abstract class UIRenderer : BasicRenderer
+    sealed class WorldRenderer : BasicRenderer
     {
-        protected UIRenderer(Vector2 size, Vector2 position = new Vector2()) : base(size, position) { }
+        private World _world;
 
-        public abstract void Render(string data);
+        public WorldRenderer(World world, Square frame, char clearChar = ' ') : base(frame, clearChar)
+        {
+            _world = world;
+        }
+
+        public WorldRenderer(World world, Vector2 size, Vector2 position = default, char clearChar = ' ')
+            : this(world, new(size, position), clearChar) { }
+
+        public void BindWorld(World world)
+        {
+            _world = world;
+        }
+
+        public void WorldToBuffer()
+        {
+            for (int y = 0; y < Size.Y; ++y)
+                for (int x = 0; x < Size.X; ++x)
+                    _frameBuffer[y * Size.X + x] = _world[x, y].Image.Data;
+
+            foreach (Entity entity in _world.Entities())
+                _frameBuffer[entity.Position.Y * Size.X + entity.Position.X] = entity.Image.Data;
+        }
     }
 
-    class ConsoleUIRenderer : UIRenderer
+    sealed class UIRenderer : BasicRenderer
     {
-        char[] _frameBuffer;
+        private string _UIData;
 
-        public ConsoleUIRenderer(Vector2 size, Vector2 position = new Vector2()) : base(size, position)
+        private char _borderVertical;
+        private char _borderHorizontal;
+        private char _borderAngle;
+
+        public UIRenderer(Square frame, char clearChar = ' ') : base(frame, clearChar)
         {
-            _frameBuffer = new char[size.X * size.Y];
-
-            int lastRowY = (size.Y - 1) * size.X;
-            int maxX = size.X - 1;
-            int maxY = size.Y - 1;
-
-            for (int x = 1; x < maxX; ++x)
-                _frameBuffer[x] = _frameBuffer[lastRowY + x] = '-';
-            for (int y = 1; y < maxY; ++y)
-                _frameBuffer[y * Size.X] = _frameBuffer[(y + 1) * Size.X - 1] = '|';
-
-            _frameBuffer[0] = _frameBuffer[maxX] = _frameBuffer[maxY * Size.X] = _frameBuffer[(Size.Y * Size.X) - 1] = '+';
-
-            Clear();
+            _UIData = "";
+            _borderVertical = '?';
+            _borderHorizontal = '?';
+            _borderAngle = '?';
         }
 
-        private void Clear()
+        public UIRenderer(Vector2 size, Vector2 position = default, char clearChar = ' ')
+            : this(new(size, position), clearChar) { }
+
+        public void SetUIData(string data)
         {
-            for (int y = 0; y < Size.Y - 2; ++y)
-                for (int x = 0; x < Size.X - 2; ++x)
-                    ContentAt(x, y) = ' ';
+            _UIData = data;
         }
 
-        private ref char ContentAt(int x, int y)
+        public void SetBorder(char vertical, char horizontal, char angle)
         {
-            return ref _frameBuffer[(y + 1) * Size.X + x + 1];
+            _borderVertical = vertical;
+            _borderHorizontal = horizontal;
+            _borderAngle = angle;
         }
 
-        public override void Render(string data)
+        public void DataToBuffer(bool addBorder)
         {
-            Clear();
-
+            int borderOffset = 1;
             int bufferSize = (Size.X - 2) * (Size.Y - 2);
-            int Length = Math.Min(bufferSize, data.Length);
 
-            for (int i = 0, y = 0, x = 0; i < Length; ++i)
+            if (addBorder)
+                MakeBorder();
+            else
             {
-                ContentAt(x, y) = data[i];
+                borderOffset = 0;
+                bufferSize = Size.X * Size.Y;
+            }
+
+            int Length = Math.Min(bufferSize, _UIData.Length);
+
+            for (int i = 0, y = borderOffset, x = borderOffset; i < Length; ++i)
+            {
+                _frameBuffer[y * Size.X + x] = _UIData[i];
                 ++x;
-                if (data[i] == '\n' || x == Size.X - 2)
+                if (_UIData[i] == '\n' || x == Size.X - borderOffset)
                 {
                     ++y;
-                    x = 0;
+                    x = borderOffset;
                 }
             }
+        }
 
-            for (int y = 0; y < Size.Y; ++y)
-            {
-                Console.SetCursorPosition(Position.X, Position.Y + y);
-                Console.Write(new string(_frameBuffer, y * Size.X, Size.X));
-            }
+        private void MakeBorder()
+        {
+            int lastRowY = (Size.Y - 1) * Size.X;
+            int maxX = Size.X - 1;
+            int maxY = Size.Y - 1;
+
+            for (int x = 1; x < maxX; ++x)
+                _frameBuffer[x] = _frameBuffer[lastRowY + x] = _borderHorizontal;
+            for (int y = 1; y < maxY; ++y)
+                _frameBuffer[y * Size.X] = _frameBuffer[(y + 1) * Size.X - 1] = _borderVertical;
+
+            _frameBuffer[0]                     = _borderAngle;
+            _frameBuffer[maxX]                  = _borderAngle;
+            _frameBuffer[maxY * Size.X]         = _borderAngle;
+            _frameBuffer[(Size.Y * Size.X) - 1] = _borderAngle;
         }
     }
 }

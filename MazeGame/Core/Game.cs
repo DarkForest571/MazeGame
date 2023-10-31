@@ -14,8 +14,9 @@ namespace MazeGame.Core
         {
             _world = new World(worldSize);
             _generator = generator;
-            _worldRenderer = new ConsoleWorldRenderer(worldSize);
-            _UIRenderer = new ConsoleUIRenderer(new Vector2(20, 10), new Vector2(worldSize.X + 5, 5));
+            _worldRenderer = new WorldRenderer(_world, worldSize);
+            _UIRenderer = new UIRenderer(new (5, 5), new Vector2(worldSize.X, 0), ' ');
+            _UIRenderer.SetBorder('|','-','+');
         }
 
         public void CreateWorld()
@@ -25,8 +26,14 @@ namespace MazeGame.Core
 
         public void RenderScene()
         {
-            _worldRenderer.Render(_world);
-            _UIRenderer.Render("1111111111111111111111111111");
+            _worldRenderer.ClearBuffer();
+            _worldRenderer.WorldToBuffer();
+            _worldRenderer.Render();
+
+            _UIRenderer.ClearBuffer();
+            _UIRenderer.SetUIData("123456789123456789123456789");
+            _UIRenderer.DataToBuffer(true);
+            _UIRenderer.Render();
         }
 
         // Entitiy manager
