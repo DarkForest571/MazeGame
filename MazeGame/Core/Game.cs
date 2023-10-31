@@ -7,10 +7,13 @@ namespace MazeGame.Core
         private World _world;
         private Generator _generator;
 
+        private WorldRenderer _worldRenderer;
+
         public Game(Vector2 worldSize, Generator generator)
         {
             _world = new World(worldSize);
             _generator = generator;
+            _worldRenderer = new CharWorldRenderer(worldSize);
         }
 
 
@@ -21,7 +24,7 @@ namespace MazeGame.Core
 
         public void RenderScene()
         {
-
+            _worldRenderer.Render(_world);
         }
 
         // Entitiy manager

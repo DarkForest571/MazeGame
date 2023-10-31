@@ -24,8 +24,8 @@ internal class Program
 
         Generator generator = new MazeGenerator(wallTile,spaceTile);
 
-        Game scene = new Game(new Vector2(MAX_X, MAX_Y), generator);
-        scene.CreateWorld();
+        Game gameInstance = new Game(new Vector2(MAX_X, MAX_Y), generator);
+        gameInstance.CreateWorld();
 
         long frame = 0;
         long lag;
@@ -57,7 +57,7 @@ internal class Program
                 Console.WriteLine("{0,-20}", new string('|', (int)(frame % framesPerSecond * 20 / framesPerSecond)));
 
                 // Render
-                //world.Render();
+                gameInstance.RenderScene();
             }
         }
         Console.Clear();

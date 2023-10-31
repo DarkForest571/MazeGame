@@ -5,13 +5,17 @@
         private Vector2 _worldSize;
 
         private Tile[,] _map;
-        private LinkedList<Entity> _entities;
+        private List<Entity> _entities;
 
         public World(Vector2 worldSize)
         {
-            _worldSize = worldSize;
+            if (worldSize > Vector2.Zero)
+                _worldSize = worldSize;
+            else
+                throw new ArgumentException();
+
             _map = new Tile[worldSize.X, worldSize.Y];
-            _entities = new LinkedList<Entity>();
+            _entities = new List<Entity>();
         }
 
         public Vector2 Size { get => _worldSize; }
@@ -20,7 +24,7 @@
 
         public Tile GetTile(Vector2 position)
         {
-            if (position > Vector2.Zero && position < _worldSize)
+            if (position >= Vector2.Zero && position < _worldSize)
                 return _map[position.X, position.Y];
             else
                 throw new ArgumentException();
@@ -32,6 +36,16 @@
         {
             if (position >= Vector2.Zero && position < _worldSize)
                 _map[position.X, position.Y] = tile;
+            else
+                throw new ArgumentException();
+        }
+
+        public int EntityCount() => _entities.Count;
+
+        public Entity GetEntity(int index)
+        {
+            if (index >= 0 && index < _entities.Count)
+                return _entities[index];
             else
                 throw new ArgumentException();
         }
