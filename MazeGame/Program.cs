@@ -31,10 +31,12 @@ internal class Program
         long lag;
 
         //InputProcessing();
+        Mutex m;
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (run)
         {
+
             // InputProcessing
 
             lag = stopwatch.ElapsedTicks;
