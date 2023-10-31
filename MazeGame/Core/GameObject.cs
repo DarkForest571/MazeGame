@@ -4,13 +4,13 @@ namespace MazeGame.Core
 {
     abstract class GameObject
     {
-        private Image _image;
+        private char _image;
 
-        protected GameObject(Image image)
+        protected GameObject(char image)
         {
             _image = image;
         }
 
-        public Image Image { get => _image; protected set => _image = value; }
+        public char Image { get => _image; protected set => _image = value; }
     }
 }

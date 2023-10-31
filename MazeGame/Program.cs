@@ -15,20 +15,16 @@ internal class Program
         const double msPerFrame = 1000.0 / framesPerSecond;
         const long deltaMicroseconds = (long)(msPerFrame * 10000);
 
-        Image wallImage = new Image('#');
-        Image spaceImage = new Image('.');
-        Image playerImage = new Image('☻');
+        Wall wallTile = new Wall('#');
+        Space spaceTile = new Space('.');
+        //'☻'
 
-        Wall wallTile = new Wall(wallImage);
-        Space spaceTile = new Space(spaceImage);
+        Game gameInstance = new Game(new Vector2(MAX_X, MAX_Y), new MazeGenerator(wallTile, spaceTile));
 
-        Generator generator = new MazeGenerator(wallTile,spaceTile);
-
-        Game gameInstance = new Game(new Vector2(MAX_X, MAX_Y), generator);
-        gameInstance.CreateWorld();
+        gameInstance.Init();
 
         long frame = 0;
-        long lag;
+        long lag = -1;
 
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (run)
@@ -59,28 +55,25 @@ internal class Program
                 gameInstance.RenderScene();
             }
         }
-        Console.Clear();
+    }
 
+    async void InputProcessing()
+    {
+        ConsoleKeyInfo consoleKeyInfo = new ConsoleKeyInfo();
+        await Task.Run(() => { consoleKeyInfo = Console.ReadKey(true); });
 
-
-        async void InputProcessing()
+        switch (consoleKeyInfo.Key)
         {
-            ConsoleKeyInfo consoleKeyInfo = new ConsoleKeyInfo();
-            await Task.Run(() => { consoleKeyInfo = Console.ReadKey(true); });
+            case ConsoleKey.C:
+                //Random rnd = Random.Shared;
+                //Vector2 position = new Vector2();
 
-            switch (consoleKeyInfo.Key)
-            {
-                case ConsoleKey.C:
-                    //Random rnd = Random.Shared;
-                    //Vector2 position = new Vector2();
-
-                    //do (position.X, position.Y) = (rnd.Next(MAX_X), rnd.Next(MAX_Y));
-                    //while (!world.PlaceEntity(new Player(playerImage, position)));
-                    break;
-                case ConsoleKey.Escape:
-                    run = false;
-                    break;
-            }
+                //do (position.X, position.Y) = (rnd.Next(MAX_X), rnd.Next(MAX_Y));
+                //while (!world.PlaceEntity(new Player(playerImage, position)));
+                break;
+            case ConsoleKey.Escape:
+                run = false;
+                break;
         }
     }
 }

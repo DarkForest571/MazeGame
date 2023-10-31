@@ -62,10 +62,10 @@ namespace MazeGame.Graphics
         {
             for (int y = 0; y < Size.Y; ++y)
                 for (int x = 0; x < Size.X; ++x)
-                    _frameBuffer[y * Size.X + x] = _world[x, y].Image.Data;
+                    _frameBuffer[y * Size.X + x] = _world[x, y].Image;
 
             foreach (Entity entity in _world.Entities())
-                _frameBuffer[entity.Position.Y * Size.X + entity.Position.X] = entity.Image.Data;
+                _frameBuffer[entity.Position.Y * Size.X + entity.Position.X] = entity.Image;
         }
     }
 
