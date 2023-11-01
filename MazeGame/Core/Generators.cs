@@ -17,13 +17,21 @@
 
         public virtual void Generate(World world)
         {
-            HorizontalLine(world, _border, new(0, 0), world.Size.X);
-            HorizontalLine(world, _border, new(0, world.Size.Y - 1), world.Size.X);
+            Box(world, _border, Vector2.Zero, world.Size);
+            Vector2 offset = new(1, 1);
+            Fill(world, _filler, Vector2.Zero + offset, world.Size - offset);
+        }
 
-            VerticalLine(world, _border, new(0, 1), world.Size.Y - 2);
-            VerticalLine(world, _border, new(world.Size.X - 1, 1), world.Size.Y - 2);
+        protected void Box(World world, Tile tile, Square squareBox)
+            => Box(world, tile, squareBox.Position, squareBox.Position + squareBox.Size);
 
-            Fill(world, _filler, new(1, 1), world.Size - new Vector2(1,1));
+        protected void Box(World world, Tile tile, Vector2 upperLeft, Vector2 bottomRight)
+        {
+            HorizontalLine(world, tile, upperLeft, bottomRight.X - upperLeft.X);
+            HorizontalLine(world, tile, new(upperLeft.X, bottomRight.Y - 1), bottomRight.X - upperLeft.X);
+
+            VerticalLine(world, tile, new(upperLeft.X, upperLeft.Y + 1), bottomRight.Y - 2 - upperLeft.Y);
+            VerticalLine(world, tile, new(bottomRight.X - 1, upperLeft.Y + 1), bottomRight.Y - 2 - upperLeft.Y);
         }
 
         protected void Fill(World world, Tile tile, Vector2 upperLeft, Vector2 bottomRight)
@@ -53,6 +61,8 @@
         public override void Generate(World world)
         {
             base.Generate(world);
+
+            Box(world, _border, world.Size * 0.25f, world.Size * 0.75f);
 
             // TODO Make maze here
         }

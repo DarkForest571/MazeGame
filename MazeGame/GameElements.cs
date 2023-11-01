@@ -5,26 +5,26 @@ namespace MazeGame
 {
     class Wall : ImpassableTile
     {
-        public Wall(char tileImage, int durability = -1) : base(tileImage, durability) { }
+        public Wall(char tileChar, int durability = -1) : base(tileChar, durability) { }
     }
 
     class Fence : ImpassableTile
     {
-        public Fence(char tileImage, int durability = 50) : base(tileImage, durability) { }
+        public Fence(char tileChar, int durability = 50) : base(tileChar, durability) { }
     }
 
     class Space : PassableTile
     {
-        public Space(char tileImage, int moveCost = 25) : base(tileImage, moveCost) { }
+        public Space(char tileChar, int moveCost = 25) : base(tileChar, moveCost) { }
     }
 
     class Swamp : PassableTile
     {
-        public Swamp(char tileImage, int moveCost = 35) : base(tileImage, moveCost) { }
+        public Swamp(char tileChar, int moveCost = 35) : base(tileChar, moveCost) { }
     }
 
     class Ruins : PassableTile
     {
-        public Ruins(char tileImage, int moveCost = 50) : base(tileImage, moveCost) { }
+        public Ruins(char tileChar, int moveCost = 50) : base(tileChar, moveCost) { }
     }
 }
