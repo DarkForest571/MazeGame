@@ -131,7 +131,7 @@
                                     world[position.X, position.Y + 1] = _border;
                                     break;
                                 case Direction.Left:
-                                    world[position.X + 1, position.Y] = _border;
+                                    world[position.X - 1, position.Y] = _border;
                                     break;
                             }
                         }
