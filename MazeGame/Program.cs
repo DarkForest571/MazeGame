@@ -9,8 +9,8 @@ internal class Program
 
     static void Main(string[] args)
     {
-        const int MAX_X = 40;
-        const int MAX_Y = 20;
+        const int MAX_X = 20;
+        const int MAX_Y = 10;
         const int framesPerSecond = 50;
         const double msPerFrame = 1000.0 / framesPerSecond;
         const long deltaMicroseconds = (long)(msPerFrame * 10000);
