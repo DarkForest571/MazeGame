@@ -1,6 +1,4 @@
-﻿using MazeGame.Graphics;
-
-namespace MazeGame.Core
+﻿namespace MazeGame.Core.GameObjects
 {
     abstract class GameObject
     {

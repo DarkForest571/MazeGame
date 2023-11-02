@@ -1,5 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 
+using MazeGame.Core.GameObjects;
+using MazeGame.Utils;
+
 namespace MazeGame.Core
 {
     class World
@@ -34,8 +37,16 @@ namespace MazeGame.Core
             set => _map[position.X, position.Y] = value;
         }
 
-        public int EntityCount() => _entities.Count;
+        public void AddEntity(Entity entity)
+        {
+            if (InBounds(entity.Position))
+                _entities.Add(entity);
+            else
+                throw new ArgumentException();
+        }
 
-        public ReadOnlyCollection<Entity> Entities() => _entities.AsReadOnly();
+        public bool InBounds(Vector2 position) => position >= Vector2.Zero && position < _worldSize;
+
+        public ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
     }
 }

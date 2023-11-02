@@ -1,5 +1,7 @@
-﻿using MazeGame.Graphics;
-using System.Diagnostics;
+﻿using System.Diagnostics;
+
+using MazeGame.Graphics;
+using MazeGame.Utils;
 
 namespace MazeGame.Core
 {
@@ -7,6 +9,7 @@ namespace MazeGame.Core
     {
         private World _world;
         private Generator _generator;
+        private GameController _controller;
 
         private WorldRenderer _worldRenderer;
         private UIRenderer _UIRenderer;
@@ -15,13 +18,16 @@ namespace MazeGame.Core
         {
             _world = new World(worldSize);
             _generator = generator;
+            _controller = new MazeGameController(_world);
             _worldRenderer = new WorldRenderer(_world, worldSize);
             _UIRenderer = new UIRenderer(new(21, 8), new Vector2(worldSize.X, 0), ' ');
         }
 
         public void Init()
         {
-            _UIRenderer.SetBorder('║', '═', 'X');
+            //'☻'
+            //'†'
+            _UIRenderer.SetBorder('║', '═', '╔', '╗', '╝', '╚');
             _generator.Generate(_world);
         }
 
@@ -52,22 +58,29 @@ namespace MazeGame.Core
                         //
                     }
 
-                    // Physics
+                    // Game logic
 
 
+
+                    // Game logic end
                     // Logs
+
                     float FPS = deltaMicroseconds / (float)lag * framesPerSecond;
                     int barLength = (int)(frame % framesPerSecond * 20 / framesPerSecond);
                     if (barLength == 0)
                         for (int i = 0; i < 20; i++)
                             bar[i] = ' ';
                     else
-                        bar[barLength] = '|';
+                        bar[barLength - 1] = '|';
 
-                    _UIRenderer.SetUIData($"{FPS,6:F3} FPS\n{(lag / 10),6:D} mics/frame\n" + bar);
+                    _UIRenderer.SetUIData($"{FPS,6:F3} FPS\n{(lag / 10),6:D} mics/frame\n" + new string(bar));
 
+                    // Logs end
                     // Render
+
                     RenderScene();
+
+                    // Render end
 
                     ++frame;
                 }

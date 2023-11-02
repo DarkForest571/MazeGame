@@ -1,6 +1,6 @@
-﻿using MazeGame.Graphics;
+﻿using MazeGame.Utils;
 
-namespace MazeGame.Core
+namespace MazeGame.Core.GameObjects
 {
     abstract class Entity : GameObject
     {
@@ -25,14 +25,15 @@ namespace MazeGame.Core
         public int HitEntity(int damage) => _health -= damage;
     }
 
-    class Player : Entity
+    sealed class Player : Entity
     {
         public Player(char image,
-                       Vector2 position = new Vector2(),
+                       Vector2 position = default,
                       int health = 100,
                       float moveCoefficient = 1.0f) : base(image,
                                                            position,
                                                            health,
-                                                           moveCoefficient) { }
+                                                           moveCoefficient)
+        { }
     }
 }

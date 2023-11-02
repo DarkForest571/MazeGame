@@ -1,4 +1,4 @@
-﻿using MazeGame.Core;
+﻿using MazeGame.Core.GameObjects;
 using MazeGame.Graphics;
 
 namespace MazeGame
@@ -8,9 +8,9 @@ namespace MazeGame
         public Wall(char tileChar, int durability = -1) : base(tileChar, durability) { }
     }
 
-    class Fence : ImpassableTile
+    class FinalHatch : PassableTile
     {
-        public Fence(char tileChar, int durability = 50) : base(tileChar, durability) { }
+        public FinalHatch(char tileChar, int durability = 50) : base(tileChar, durability) { }
     }
 
     class Space : PassableTile
@@ -18,9 +18,9 @@ namespace MazeGame
         public Space(char tileChar, int moveCost = 25) : base(tileChar, moveCost) { }
     }
 
-    class Swamp : PassableTile
+    class Grave : PassableTile
     {
-        public Swamp(char tileChar, int moveCost = 35) : base(tileChar, moveCost) { }
+        public Grave(char tileChar, int moveCost = 35) : base(tileChar, moveCost) { }
     }
 
     class Ruins : PassableTile

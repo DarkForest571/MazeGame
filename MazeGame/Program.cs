@@ -1,6 +1,5 @@
-﻿using System.Diagnostics;
-using MazeGame.Core;
-using MazeGame.Graphics;
+﻿using MazeGame.Core;
+using MazeGame.Utils;
 using MazeGame;
 
 internal class Program
@@ -9,15 +8,14 @@ internal class Program
 
     static void Main(string[] args)
     {
-        const int MAX_X = 61;
-        const int MAX_Y = 25;
+        const int worldWidth = 61;
+        const int worldHight = 25;
         const int framesPerSecond = 50;
         
         Wall wallTile = new Wall('█');
         Space spaceTile = new Space(' ');
-        //'☻'
 
-        Game gameInstance = new Game(new Vector2(MAX_X, MAX_Y), new MazeGenerator(wallTile, spaceTile));
+        Game gameInstance = new Game(new Vector2(worldWidth, worldHight), new MazeGenerator(wallTile, spaceTile));
 
         gameInstance.Init();
 
