@@ -5,12 +5,12 @@ namespace MazeGame
 {
     class Wall : ImpassableTile
     {
-        public Wall(char tileChar, int durability = -1) : base(tileChar, durability) { }
+        public Wall(char tileChar) : base(tileChar) { }
     }
 
     class FinalHatch : PassableTile
     {
-        public FinalHatch(char tileChar, int durability = 50) : base(tileChar, durability) { }
+        public FinalHatch(char tileChar, int moveCost = 50) : base(tileChar, moveCost) { }
     }
 
     class Space : PassableTile

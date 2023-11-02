@@ -19,15 +19,6 @@
 
     abstract class ImpassableTile : Tile
     {
-        private int _durability;
-
-        protected ImpassableTile(char image, int durability) : base(image)
-        {
-            _durability = durability;
-        }
-
-        public int Durability { get => _durability; private set => _durability = value; }
-
-        public int HitTile(int damage) => _durability == -1 ? 1 : _durability -= damage;
+        protected ImpassableTile(char image) : base(image) { }
     }
 }
