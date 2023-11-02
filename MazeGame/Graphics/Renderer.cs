@@ -117,13 +117,15 @@ namespace MazeGame.Graphics
 
             for (int i = 0, y = borderOffset, x = borderOffset; i < Length; ++i)
             {
-                _frameBuffer[y * Size.X + x] = _UIData[i];
-                ++x;
                 if (_UIData[i] == '\n' || x == Size.X - borderOffset)
                 {
                     ++y;
                     x = borderOffset;
                 }
+                if (_UIData[i] == '\n')
+                    continue;
+                _frameBuffer[y * Size.X + x] = _UIData[i];
+                ++x;
             }
         }
 
@@ -138,9 +140,9 @@ namespace MazeGame.Graphics
             for (int y = 1; y < maxY; ++y)
                 _frameBuffer[y * Size.X] = _frameBuffer[(y + 1) * Size.X - 1] = _borderVertical;
 
-            _frameBuffer[0]                     = _borderAngle;
-            _frameBuffer[maxX]                  = _borderAngle;
-            _frameBuffer[maxY * Size.X]         = _borderAngle;
+            _frameBuffer[0] = _borderAngle;
+            _frameBuffer[maxX] = _borderAngle;
+            _frameBuffer[maxY * Size.X] = _borderAngle;
             _frameBuffer[(Size.Y * Size.X) - 1] = _borderAngle;
         }
     }

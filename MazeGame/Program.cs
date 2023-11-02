@@ -9,52 +9,19 @@ internal class Program
 
     static void Main(string[] args)
     {
-        const int MAX_X = 20;
-        const int MAX_Y = 10;
+        const int MAX_X = 61;
+        const int MAX_Y = 25;
         const int framesPerSecond = 50;
-        const double msPerFrame = 1000.0 / framesPerSecond;
-        const long deltaMicroseconds = (long)(msPerFrame * 10000);
-
-        Wall wallTile = new Wall('#');
-        Space spaceTile = new Space('.');
+        
+        Wall wallTile = new Wall('█');
+        Space spaceTile = new Space(' ');
         //'☻'
 
         Game gameInstance = new Game(new Vector2(MAX_X, MAX_Y), new MazeGenerator(wallTile, spaceTile));
 
         gameInstance.Init();
 
-        long frame = 0;
-        long lag = -1;
-
-        Stopwatch stopwatch = Stopwatch.StartNew();
-        while (run)
-        {
-
-            // InputProcessing
-
-            lag = stopwatch.ElapsedTicks;
-
-            if (lag >= deltaMicroseconds)
-            {
-                stopwatch.Restart();
-                if (frame++ % framesPerSecond == 0)
-                {
-                    //
-                }
-
-                // Physics
-
-
-                // Logs
-                Console.SetCursorPosition(0, MAX_Y);
-                Console.WriteLine("{0:F3} FPS", deltaMicroseconds / (float)lag * framesPerSecond);
-                Console.WriteLine("{0,-9} mics/frame", lag / 10);
-                Console.WriteLine("{0,-20}", new string('|', (int)(frame % framesPerSecond * 20 / framesPerSecond)));
-
-                // Render
-                gameInstance.RenderScene();
-            }
-        }
+        gameInstance.RunGameLoop(framesPerSecond);
     }
 
     async void InputProcessing()
