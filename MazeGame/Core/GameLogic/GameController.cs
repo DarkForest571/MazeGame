@@ -3,11 +3,11 @@ using MazeGame.Utils;
 
 namespace MazeGame.Core.GameLogic
 {
-    interface GameController
+    interface IGameController
     {
-        public void InitGame();
+        public void InitLevel();
 
-        public void AddSpawner(Spawner spawner);
+        public void AddSpawner(ISpawner spawner);
 
         public void UpdateAI();
 
@@ -16,37 +16,39 @@ namespace MazeGame.Core.GameLogic
         public bool CheckWinCondition();
     }
 
-    sealed class MazeGameController : GameController
+    sealed class MazeGameController : IGameController
     {
         private World _world;
 
-        private Player _player;
         private FinalHatch _finalHatch;
         private Grave _grave;
 
-        private List<Spawner> _enemySpawners;
+        private ISpawner _playerSpawner;
+        private Player _currentPlayer;
+
+        private List<ISpawner> _enemySpawners;
 
         public MazeGameController(World world, Player player, FinalHatch finalHatch, Grave grave)
         {
             _world = world;
-            _player = player;
+            _playerSpawner = new WorldwiseSpawner(world, player, 1);
             _finalHatch = finalHatch;
             _grave = grave;
-            _enemySpawners = new List<Spawner>();
+            _enemySpawners = new List<ISpawner>();
         }
 
-        public void InitGame()
+        public void InitLevel()
         {
             Vector2 position = _world.GetRandomTileByCondition((tile) => tile is PassableTile);
             _world[position] = _finalHatch;
 
-            position = _world.GetRandomTileByCondition((tile) => tile is PassableTile);
+            _currentPlayer = _playerSpawner.SpawnOne() as Player;
 
-            foreach (Spawner spawner in _enemySpawners)
+            foreach (ISpawner spawner in _enemySpawners)
                 spawner.SpawnAll();
         }
 
-        public void AddSpawner(Spawner spawner)
+        public void AddSpawner(ISpawner spawner)
         {
             _enemySpawners.Add(spawner);
         }
@@ -63,7 +65,7 @@ namespace MazeGame.Core.GameLogic
 
         public bool CheckWinCondition()
         {
-            return _world[_player.Position] is FinalHatch;
+            return _world[_currentPlayer.Position] is FinalHatch;
         }
     }
 }

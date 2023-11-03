@@ -111,15 +111,15 @@ namespace MazeGame.Graphics
 
         public void SetBorder(char vertical,
                               char horizontal,
-                              char upperLeftAngle,
-                              char upperRightAngle,
+                              char topLeftAngle,
+                              char topRightAngle,
                               char bottomRightAngle,
                               char bottomLeftAngle)
         {
             _borderVertical = vertical;
             _borderHorizontal = horizontal;
-            _borderULAngle = upperLeftAngle;
-            _borderURAngle = upperRightAngle;
+            _borderULAngle = topLeftAngle;
+            _borderURAngle = topRightAngle;
             _borderBRAngle = bottomRightAngle;
             _borderBLAngle = bottomLeftAngle;
         }

@@ -3,11 +3,9 @@ using MazeGame.Utils;
 
 namespace MazeGame.Core.GameLogic
 {
-    interface Spawner
+    interface ISpawner
     {
-        public void SpawnOne();
-
-        public void SpawnN(int count);
+        public Entity SpawnOne();
 
         public void SpawnAll();
 
@@ -16,7 +14,7 @@ namespace MazeGame.Core.GameLogic
         public int Count { get; set; }
     }
 
-    sealed class WorldwiseSpawner : Spawner
+    sealed class WorldwiseSpawner : ISpawner
     {
         private World _world;
         private Entity _entity;
@@ -33,18 +31,18 @@ namespace MazeGame.Core.GameLogic
 
         public int Count { get => _count; set => _count = value; }
 
-        public void SpawnOne()
+        public Entity SpawnOne()
         {
             _entity.Position = _world.GetRandomTileByCondition((tile) => tile is PassableTile);
-            _world.AddEntity(_entity.Clone());
+            Entity entity = _entity.Clone();
+            _world.AddEntity(entity);
+            return entity;
         }
 
-        public void SpawnN(int count)
+        public void SpawnAll()
         {
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < _count; i++)
                 SpawnOne();
         }
-
-        public void SpawnAll() => SpawnN(_count);
     }
 }

@@ -3,12 +3,12 @@ using MazeGame.Utils;
 
 namespace MazeGame.Core
 {
-    interface Generator
+    interface IGenerator
     {
         public void Generate();
     }
 
-    class DefaultGenerator : Generator
+    class DefaultGenerator : IGenerator
     {
         protected World _world;
 
@@ -31,20 +31,20 @@ namespace MazeGame.Core
         protected void Box(World world, Tile tile, Square squareBox)
             => Box(world, tile, squareBox.Position, squareBox.Position + squareBox.Size);
 
-        protected void Box(World world, Tile tile, Vector2 upperLeft, Vector2 bottomRight)
+        protected void Box(World world, Tile tile, Vector2 topLeft, Vector2 bottomRight)
         {
-            HorizontalLine(world, tile, upperLeft, bottomRight.X - upperLeft.X);
-            HorizontalLine(world, tile, new(upperLeft.X, bottomRight.Y - 1), bottomRight.X - upperLeft.X);
+            HorizontalLine(world, tile, topLeft, bottomRight.X - topLeft.X);
+            HorizontalLine(world, tile, new(topLeft.X, bottomRight.Y - 1), bottomRight.X - topLeft.X);
 
-            VerticalLine(world, tile, new(upperLeft.X, upperLeft.Y + 1), bottomRight.Y - 2 - upperLeft.Y);
-            VerticalLine(world, tile, new(bottomRight.X - 1, upperLeft.Y + 1), bottomRight.Y - 2 - upperLeft.Y);
+            VerticalLine(world, tile, new(topLeft.X, topLeft.Y + 1), bottomRight.Y - 2 - topLeft.Y);
+            VerticalLine(world, tile, new(bottomRight.X - 1, topLeft.Y + 1), bottomRight.Y - 2 - topLeft.Y);
         }
 
-        protected void Fill(World world, Tile tile, Vector2 upperLeft, Vector2 bottomRight)
+        protected void Fill(World world, Tile tile, Vector2 topLeft, Vector2 bottomRight)
         {
-            int length = bottomRight.X - upperLeft.X;
-            for (int y = upperLeft.Y, yend = bottomRight.Y; y < yend; ++y)
-                HorizontalLine(world, tile, new(upperLeft.X, y), length);
+            int length = bottomRight.X - topLeft.X;
+            for (int y = topLeft.Y, yend = bottomRight.Y; y < yend; ++y)
+                HorizontalLine(world, tile, new(topLeft.X, y), length);
         }
 
         protected void HorizontalLine(World world, Tile tile, Vector2 position, int length)
@@ -106,7 +106,7 @@ namespace MazeGame.Core
                 if (position.Y / 2 + 1 < maxY
                     && !mask[position.X / 2, position.Y / 2 + 1]
                     && (_world[position.X, position.Y + 1] is PassableTile || rollBack))
-                    availableDirections.Add(Direction.Bottom);
+                    availableDirections.Add(Direction.Down);
 
                 if (position.X / 2 - 1 >= 0
                     && !mask[position.X / 2 - 1, position.Y / 2]
@@ -133,7 +133,7 @@ namespace MazeGame.Core
                                 case Direction.Right:
                                     _world[position.X + 1, position.Y] = _border;
                                     break;
-                                case Direction.Bottom:
+                                case Direction.Down:
                                     _world[position.X, position.Y + 1] = _border;
                                     break;
                                 case Direction.Left:
@@ -157,7 +157,7 @@ namespace MazeGame.Core
                                 _world[position.X + 1, position.Y] = _filler;
                             position.X += 2;
                             break;
-                        case Direction.Bottom:
+                        case Direction.Down:
                             if (rollBack)
                                 _world[position.X, position.Y + 1] = _filler;
                             position.Y += 2;
@@ -183,7 +183,7 @@ namespace MazeGame.Core
                         case Direction.Right:
                             position.X -= 2;
                             break;
-                        case Direction.Bottom:
+                        case Direction.Down:
                             position.Y -= 2;
                             break;
                         case Direction.Left:

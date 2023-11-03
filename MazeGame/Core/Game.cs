@@ -9,8 +9,8 @@ namespace MazeGame.Core
     sealed class Game
     {
         private World _world;
-        private Generator _generator;
-        private GameController _controller;
+        private IGenerator _generator;
+        private IGameController _controller;
 
         private WorldRenderer _worldRenderer;
         private UIRenderer _UIRenderer;
@@ -31,8 +31,8 @@ namespace MazeGame.Core
 
         public void Init()
         {
-            Spawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z'), 15);
-            Spawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 10);
+            ISpawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z'), 15);
+            ISpawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 10);
 
             _controller.AddSpawner(zombieSpawner);
             _controller.AddSpawner(shooterSpawner);
@@ -45,7 +45,7 @@ namespace MazeGame.Core
         private void RestartLevel()
         {
             _generator.Generate();
-            _controller.SpawnAllEnemies();
+            _controller.InitLevel();
         }
 
         public void RunGameLoop(int framesPerSecond)
