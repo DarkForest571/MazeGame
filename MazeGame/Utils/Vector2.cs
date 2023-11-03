@@ -51,6 +51,17 @@
         public static Vector2 operator /(Vector2 left, float right) => new((int)(left.X / right), (int)(left.Y / right));
 
 
+        public static Vector2 FromDirection(Direction direction) =>
+            direction switch
+            {
+                Direction.Up => Up,
+                Direction.Right => Right,
+                Direction.Down => Down,
+                Direction.Left => Left,
+                Direction.None => Zero,
+                _ => throw new ArgumentException()
+            };
+
         public void Deconstruct(out int X, out int Y)
         {
             throw new NotImplementedException();

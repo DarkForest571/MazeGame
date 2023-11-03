@@ -73,8 +73,6 @@ namespace MazeGame.Core
             //if (world.Size.Y % 2 == 0)
             //    HorizontalLine(world, _border, new(1, world.Size.Y - 2), world.Size.X - 2);
 
-            //Box(world, _border, world.Size * 0.25f, world.Size * 0.75f);
-
             int maxX = (_world.Size.X - 1) / 2;
             int maxY = (_world.Size.Y - 1) / 2;
             bool[,] mask = new bool[maxX, maxY];
@@ -90,9 +88,10 @@ namespace MazeGame.Core
 
             do // while (path.Count != 0)
             {
-                // Check frees
+                // Check free directions
                 availableDirections.Clear();
 
+                // TODO flush this and create function for this
                 if (position.Y / 2 - 1 >= 0
                     && !mask[position.X / 2, position.Y / 2 - 1]
                     && (_world[position.X, position.Y - 1] is PassableTile || rollBack))
@@ -117,79 +116,29 @@ namespace MazeGame.Core
 
                 if (availableDirections.Count != 0)
                 {
-                    // Make walls
-
                     int choise = Random.Shared.Next(availableDirections.Count);
 
+                    // Make walls
                     for (int i = 0; i < availableDirections.Count; ++i)
                     {
                         if (i != choise)
                         {
-                            switch (availableDirections[i])
-                            {
-                                case Direction.Up:
-                                    _world[position.X, position.Y - 1] = _border;
-                                    break;
-                                case Direction.Right:
-                                    _world[position.X + 1, position.Y] = _border;
-                                    break;
-                                case Direction.Down:
-                                    _world[position.X, position.Y + 1] = _border;
-                                    break;
-                                case Direction.Left:
-                                    _world[position.X - 1, position.Y] = _border;
-                                    break;
-                            }
+                            Vector2 newPosition = position + Vector2.FromDirection(availableDirections[i]);
+                            _world[newPosition] = _border;
                         }
                     }
 
                     // Move position
-
-                    switch (availableDirections[choise])
-                    {
-                        case Direction.Up:
-                            if (rollBack)
-                                _world[position.X, position.Y - 1] = _filler;
-                            position.Y -= 2;
-                            break;
-                        case Direction.Right:
-                            if (rollBack)
-                                _world[position.X + 1, position.Y] = _filler;
-                            position.X += 2;
-                            break;
-                        case Direction.Down:
-                            if (rollBack)
-                                _world[position.X, position.Y + 1] = _filler;
-                            position.Y += 2;
-                            break;
-                        case Direction.Left:
-                            if (rollBack)
-                                _world[position.X - 1, position.Y] = _filler;
-                            position.X -= 2;
-                            break;
-                    }
+                    Vector2 directionVector = Vector2.FromDirection(availableDirections[choise]);
+                    _world[position + directionVector] = _filler;
+                    position += directionVector * 2;
 
                     path.Push(availableDirections[choise]);
-
                     rollBack = false;
                 }
                 else
                 {
-                    switch (path.Pop())
-                    {
-                        case Direction.Up:
-                            position.Y += 2;
-                            break;
-                        case Direction.Right:
-                            position.X -= 2;
-                            break;
-                        case Direction.Down:
-                            position.Y -= 2;
-                            break;
-                        case Direction.Left:
-                            position.X += 2;
-                            break;
-                    }
+                    position -= Vector2.FromDirection(path.Pop()) * 2;
 
                     rollBack = true;
                 }

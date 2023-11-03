@@ -42,7 +42,7 @@ namespace MazeGame.Core.GameLogic
             Vector2 position = _world.GetRandomTileByCondition((tile) => tile is PassableTile);
             _world[position] = _finalHatch;
 
-            _currentPlayer = _playerSpawner.SpawnOne() as Player;
+            _currentPlayer = (Player)_playerSpawner.SpawnOne();
 
             foreach (ISpawner spawner in _enemySpawners)
                 spawner.SpawnAll();
