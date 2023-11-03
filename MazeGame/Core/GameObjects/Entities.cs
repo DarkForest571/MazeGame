@@ -20,7 +20,11 @@ namespace MazeGame.Core.GameObjects
 
         public Vector2 Position { get => _position; set => _position = value; }
 
-        public float MoveCoefficient { get => _moveCoefficient; }
+        public int Health => _health;
+
+        public float MoveCoefficient => _moveCoefficient;
+
+        public abstract override Entity Clone();
 
         public int HitEntity(int damage) => _health -= damage;
     }
@@ -35,5 +39,7 @@ namespace MazeGame.Core.GameObjects
                                                            health,
                                                            moveCoefficient)
         { }
+
+        public override Player Clone() => new Player(Image, Position, Health, MoveCoefficient);
     }
 }

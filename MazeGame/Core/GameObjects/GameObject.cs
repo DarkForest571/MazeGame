@@ -10,5 +10,7 @@
         }
 
         public char Image { get => _image; protected set => _image = value; }
+
+        public abstract GameObject Clone();
     }
 }

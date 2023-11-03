@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-
+using MazeGame.Core.GameObjects;
 using MazeGame.Graphics;
 using MazeGame.Utils;
 
@@ -9,7 +9,7 @@ namespace MazeGame.Core
     {
         private World _world;
         private Generator _generator;
-        private GameController _controller;
+        private MazeGameController _controller;
 
         private WorldRenderer _worldRenderer;
         private UIRenderer _UIRenderer;

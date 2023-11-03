@@ -4,8 +4,6 @@ using MazeGame;
 
 internal class Program
 {
-    static bool run = true;
-
     static void Main(string[] args)
     {
         const int worldWidth = 61;
@@ -15,7 +13,9 @@ internal class Program
         Wall wallTile = new Wall('█');
         Space spaceTile = new Space(' ');
 
-        Game gameInstance = new Game(new Vector2(worldWidth, worldHight), new MazeGenerator(wallTile, spaceTile));
+        Generator generator = new MazeGenerator(wallTile, spaceTile);
+
+        Game gameInstance = new Game(new (worldWidth, worldHight), generator);
 
         gameInstance.Init();
 
@@ -37,7 +37,7 @@ internal class Program
                 //while (!world.PlaceEntity(new Player(playerImage, position)));
                 break;
             case ConsoleKey.Escape:
-                run = false;
+                //run = false;
                 break;
         }
     }
