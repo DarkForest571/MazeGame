@@ -1,6 +1,6 @@
 ﻿using MazeGame.Core.GameObjects;
 
-namespace MazeGame.Core
+namespace MazeGame.Core.GameLogic
 {
     interface Spawner
     {
@@ -39,7 +39,7 @@ namespace MazeGame.Core
             {
                 x = Random.Shared.Next(_world.Size.X);
                 y = Random.Shared.Next(_world.Size.Y);
-            } while (_world[x, y] is PassableTile);
+            } while (_world[x, y] is ImpassableTile);
 
             _entity.Position = new(x, y);
             _world.AddEntity(_entity.Clone());

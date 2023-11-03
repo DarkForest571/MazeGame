@@ -192,13 +192,5 @@ namespace MazeGame.Core
                 }
             } while (path.Count != 0);
         }
-        enum Direction
-        {
-            Up,
-            Right,
-            Bottom,
-            Left,
-            None
-        }
     }
 }

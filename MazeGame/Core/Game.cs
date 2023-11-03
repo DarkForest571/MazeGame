@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using MazeGame.Core.GameLogic;
 using MazeGame.Core.GameObjects;
 using MazeGame.Graphics;
 using MazeGame.Utils;
@@ -27,8 +28,21 @@ namespace MazeGame.Core
         {
             //'☻'
             //'†'
+            Spawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z'), 15);
+            Spawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 10);
+
+            _controller.AddSpawner(zombieSpawner);
+            _controller.AddSpawner(shooterSpawner);
+
             _UIRenderer.SetBorder('║', '═', '╔', '╗', '╝', '╚');
+
+            RestartLevel();
+        }
+
+        public void RestartLevel()
+        {
             _generator.Generate(_world);
+            _controller.InitLevel();
         }
 
         public void RunGameLoop(int framesPerSecond)

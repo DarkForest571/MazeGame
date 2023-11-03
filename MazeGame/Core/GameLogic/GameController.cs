@@ -1,6 +1,4 @@
-﻿using MazeGame.Core.GameObjects;
-
-namespace MazeGame.Core
+﻿namespace MazeGame.Core.GameLogic
 {
     interface GameController
     {
@@ -30,23 +28,10 @@ namespace MazeGame.Core
 
         public void InitLevel()
         {
-            foreach (var spawnSettings in _enemiesSpawnSettings)
+            foreach (Spawner spawner in _enemySpawners)
             {
-                SpawnEntities(spawnSettings.Item1, spawnSettings.Item2);
+                spawner.SpawnAll();
             }
-        }
-
-        private void SpawnEntities(Entity entity, int count)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                SpawnInRandomPosition(entity);
-            }
-        }
-
-        private void SpawnInRandomPosition(Entity entity)
-        {
-            
         }
 
         public void UpdateAI()
