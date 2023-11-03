@@ -5,24 +5,27 @@ namespace MazeGame.Core
 {
     interface Generator
     {
-        public void Generate(World world);
+        public void Generate();
     }
 
     class DefaultGenerator : Generator
     {
+        protected World _world;
+
         protected readonly Tile _border;
         protected readonly Tile _filler;
 
-        public DefaultGenerator(Tile border, Tile filler)
+        public DefaultGenerator(World world, Tile border, Tile filler)
         {
+            _world = world;
             (_border, _filler) = (border, filler);
         }
 
-        public virtual void Generate(World world)
+        public virtual void Generate()
         {
-            Box(world, _border, Vector2.Zero, world.Size);
+            Box(_world, _border, Vector2.Zero, _world.Size);
             Vector2 offset = new(1, 1);
-            Fill(world, _filler, Vector2.Zero + offset, world.Size - offset);
+            Fill(_world, _filler, Vector2.Zero + offset, _world.Size - offset);
         }
 
         protected void Box(World world, Tile tile, Square squareBox)
@@ -59,11 +62,11 @@ namespace MazeGame.Core
 
     class MazeGenerator : DefaultGenerator
     {
-        public MazeGenerator(Tile wall, Tile filler) : base(wall, filler) { }
+        public MazeGenerator(World world, Tile wall, Tile filler) : base(world, wall, filler) { }
 
-        public override void Generate(World world)
+        public override void Generate()
         {
-            base.Generate(world);
+            base.Generate();
 
             //if (world.Size.X % 2 == 0)
             //    VerticalLine(world, _border, new(world.Size.X - 2, 1), world.Size.Y - 2);
@@ -72,13 +75,13 @@ namespace MazeGame.Core
 
             //Box(world, _border, world.Size * 0.25f, world.Size * 0.75f);
 
-            int maxX = (world.Size.X - 1) / 2;
-            int maxY = (world.Size.Y - 1) / 2;
+            int maxX = (_world.Size.X - 1) / 2;
+            int maxY = (_world.Size.Y - 1) / 2;
             bool[,] mask = new bool[maxX, maxY];
 
-            for (int y = 2; y < world.Size.Y; y += 2)
-                for (int x = 2; x < world.Size.X; x += 2)
-                    world[x, y] = _border;
+            for (int y = 2; y < _world.Size.Y; y += 2)
+                for (int x = 2; x < _world.Size.X; x += 2)
+                    _world[x, y] = _border;
 
             bool rollBack = false;
             Vector2 position = new(1, 1);
@@ -92,22 +95,22 @@ namespace MazeGame.Core
 
                 if (position.Y / 2 - 1 >= 0
                     && !mask[position.X / 2, position.Y / 2 - 1]
-                    && (world[position.X, position.Y - 1] is PassableTile || rollBack))
+                    && (_world[position.X, position.Y - 1] is PassableTile || rollBack))
                     availableDirections.Add(Direction.Up);
 
                 if (position.X / 2 + 1 < maxX
                     && !mask[position.X / 2 + 1, position.Y / 2]
-                    && (world[position.X + 1, position.Y] is PassableTile || rollBack))
+                    && (_world[position.X + 1, position.Y] is PassableTile || rollBack))
                     availableDirections.Add(Direction.Right);
 
                 if (position.Y / 2 + 1 < maxY
                     && !mask[position.X / 2, position.Y / 2 + 1]
-                    && (world[position.X, position.Y + 1] is PassableTile || rollBack))
+                    && (_world[position.X, position.Y + 1] is PassableTile || rollBack))
                     availableDirections.Add(Direction.Bottom);
 
                 if (position.X / 2 - 1 >= 0
                     && !mask[position.X / 2 - 1, position.Y / 2]
-                    && (world[position.X - 1, position.Y] is PassableTile || rollBack))
+                    && (_world[position.X - 1, position.Y] is PassableTile || rollBack))
                     availableDirections.Add(Direction.Left);
 
                 mask[position.X / 2, position.Y / 2] = true;
@@ -125,16 +128,16 @@ namespace MazeGame.Core
                             switch (availableDirections[i])
                             {
                                 case Direction.Up:
-                                    world[position.X, position.Y - 1] = _border;
+                                    _world[position.X, position.Y - 1] = _border;
                                     break;
                                 case Direction.Right:
-                                    world[position.X + 1, position.Y] = _border;
+                                    _world[position.X + 1, position.Y] = _border;
                                     break;
                                 case Direction.Bottom:
-                                    world[position.X, position.Y + 1] = _border;
+                                    _world[position.X, position.Y + 1] = _border;
                                     break;
                                 case Direction.Left:
-                                    world[position.X - 1, position.Y] = _border;
+                                    _world[position.X - 1, position.Y] = _border;
                                     break;
                             }
                         }
@@ -146,22 +149,22 @@ namespace MazeGame.Core
                     {
                         case Direction.Up:
                             if (rollBack)
-                                world[position.X, position.Y - 1] = _filler;
+                                _world[position.X, position.Y - 1] = _filler;
                             position.Y -= 2;
                             break;
                         case Direction.Right:
                             if (rollBack)
-                                world[position.X + 1, position.Y] = _filler;
+                                _world[position.X + 1, position.Y] = _filler;
                             position.X += 2;
                             break;
                         case Direction.Bottom:
                             if (rollBack)
-                                world[position.X, position.Y + 1] = _filler;
+                                _world[position.X, position.Y + 1] = _filler;
                             position.Y += 2;
                             break;
                         case Direction.Left:
                             if (rollBack)
-                                world[position.X - 1, position.Y] = _filler;
+                                _world[position.X - 1, position.Y] = _filler;
                             position.X -= 2;
                             break;
                     }

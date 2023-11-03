@@ -45,6 +45,17 @@ namespace MazeGame.Core
                 throw new ArgumentException();
         }
 
+        public Vector2 GetRandomTileByCondition(Func<Tile, bool> condition)
+        {
+            Vector2 position = new Vector2();
+            do
+            {
+                position.X = Random.Shared.Next(Size.X);
+                position.Y = Random.Shared.Next(Size.Y);
+            } while (!condition(this[position]));
+            return position;
+        }
+
         public bool InBounds(Vector2 position) => position >= Vector2.Zero && position < _worldSize;
 
         public ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();

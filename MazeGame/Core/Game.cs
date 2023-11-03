@@ -10,24 +10,27 @@ namespace MazeGame.Core
     {
         private World _world;
         private Generator _generator;
-        private MazeGameController _controller;
+        private GameController _controller;
 
         private WorldRenderer _worldRenderer;
         private UIRenderer _UIRenderer;
 
-        public Game(Vector2 worldSize, Generator generator)
+        public Game(Vector2 worldSize)
         {
             _world = new World(worldSize);
-            _generator = generator;
-            _controller = new MazeGameController(_world);
+            _generator = new MazeGenerator(_world, new Wall('█'), new Space(' '));
+
+            _controller = new MazeGameController(_world,
+                                                 new Player('☻'),
+                                                 new FinalHatch('#'),
+                                                 new Grave('†'));
+
             _worldRenderer = new WorldRenderer(_world, worldSize);
-            _UIRenderer = new UIRenderer(new(21, 8), new Vector2(worldSize.X, 0), ' ');
+            _UIRenderer = new UIRenderer(new(21, 8), new Vector2(worldSize.X, 0));
         }
 
         public void Init()
         {
-            //'☻'
-            //'†'
             Spawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z'), 15);
             Spawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 10);
 
@@ -39,10 +42,10 @@ namespace MazeGame.Core
             RestartLevel();
         }
 
-        public void RestartLevel()
+        private void RestartLevel()
         {
-            _generator.Generate(_world);
-            _controller.InitLevel();
+            _generator.Generate();
+            _controller.SpawnAllEnemies();
         }
 
         public void RunGameLoop(int framesPerSecond)
@@ -101,12 +104,7 @@ namespace MazeGame.Core
             }
         }
 
-        public void CreateWorld()
-        {
-            _generator.Generate(_world);
-        }
-
-        public void RenderScene()
+        private void RenderScene()
         {
             Console.CursorVisible = false;
             _worldRenderer.ClearBuffer();
@@ -117,17 +115,5 @@ namespace MazeGame.Core
             _UIRenderer.DataToBuffer(true);
             _UIRenderer.Render();
         }
-
-        // Entitiy manager
-
-        //public bool PlaceEntity(Entity entity)
-        //{
-        //    if (TileAt(entity.Position) is PassableTile)
-        //    {
-        //        _entities.AddLast(entity);
-        //        return true;
-        //    }
-        //    return false;
-        //}
     }
 }

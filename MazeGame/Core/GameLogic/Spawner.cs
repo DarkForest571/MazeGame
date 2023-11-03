@@ -1,4 +1,5 @@
 ﻿using MazeGame.Core.GameObjects;
+using MazeGame.Utils;
 
 namespace MazeGame.Core.GameLogic
 {
@@ -34,14 +35,7 @@ namespace MazeGame.Core.GameLogic
 
         public void SpawnOne()
         {
-            int x, y;
-            do
-            {
-                x = Random.Shared.Next(_world.Size.X);
-                y = Random.Shared.Next(_world.Size.Y);
-            } while (_world[x, y] is ImpassableTile);
-
-            _entity.Position = new(x, y);
+            _entity.Position = _world.GetRandomTileByCondition((tile) => tile is PassableTile);
             _world.AddEntity(_entity.Clone());
         }
 

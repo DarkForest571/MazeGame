@@ -1,6 +1,5 @@
 ﻿using MazeGame.Core;
-using MazeGame.Utils;
-using MazeGame;
+using MazeGame.Core.GameLogic;
 
 internal class Program
 {
@@ -10,12 +9,7 @@ internal class Program
         const int worldHight = 25;
         const int framesPerSecond = 50;
         
-        Wall wallTile = new Wall('█');
-        Space spaceTile = new Space(' ');
-
-        Generator generator = new MazeGenerator(wallTile, spaceTile);
-
-        Game gameInstance = new Game(new (worldWidth, worldHight), generator);
+        Game gameInstance = new Game(new (worldWidth, worldHight));
 
         gameInstance.Init();
 

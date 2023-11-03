@@ -1,7 +1,6 @@
 ﻿using MazeGame.Core.GameObjects;
-using MazeGame.Graphics;
 
-namespace MazeGame
+namespace MazeGame.Core.GameLogic
 {
     class Wall : ImpassableTile
     {
