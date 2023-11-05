@@ -9,7 +9,7 @@ namespace MazeGame.Core.GameLogic
 
         public void AddSpawner(ISpawner spawner);
 
-        public void UpdateAI();
+        public void UpdateAI(int framesPerSecond);
 
         public void UpdateEntities();
 
@@ -39,7 +39,9 @@ namespace MazeGame.Core.GameLogic
 
         public void InitLevel()
         {
-            Vector2 position = _world.GetRandomTileByCondition((tile) => tile is PassableTile);
+            _world.RemoveAllCreatures();
+
+            Vector2 position = _world.GetRandomPositionByCondition((tile) => tile is PassableTile);
             _world[position] = _finalHatch;
 
             _currentPlayer = (Player)_playerSpawner.SpawnOne();
@@ -53,9 +55,12 @@ namespace MazeGame.Core.GameLogic
             _enemySpawners.Add(spawner);
         }
 
-        public void UpdateAI()
+        public void UpdateAI(int framesPerSecond)
         {
-
+            foreach (Creature creature in _world.Creatures)
+            {
+                creature.UpdateAI(framesPerSecond);
+            }
         }
 
         public void UpdateEntities()

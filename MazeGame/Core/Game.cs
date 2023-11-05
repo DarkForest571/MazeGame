@@ -29,7 +29,7 @@ namespace MazeGame.Core
             _UIRenderer = new UIRenderer(new(21, 8), new Vector2(worldSize.X, 0));
         }
 
-        public void Init()
+        public void InitGame()
         {
             ISpawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z'), 15);
             ISpawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 10);
@@ -77,7 +77,7 @@ namespace MazeGame.Core
 
                     // Game logic
 
-
+                    _controller.UpdateAI(framesPerSecond);
 
                     // Game logic end
                     // Logs

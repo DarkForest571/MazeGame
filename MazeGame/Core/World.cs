@@ -10,7 +10,7 @@ namespace MazeGame.Core
         private Vector2 _worldSize;
 
         private Tile[,] _map;
-        private List<Entity> _entities;
+        private List<Creature> _creatures;
 
         public World(Vector2 worldSize)
         {
@@ -20,7 +20,7 @@ namespace MazeGame.Core
                 throw new ArgumentException();
 
             _map = new Tile[worldSize.X, worldSize.Y];
-            _entities = new List<Entity>();
+            _creatures = new List<Creature>();
         }
 
         public Vector2 Size { get => _worldSize; }
@@ -37,15 +37,25 @@ namespace MazeGame.Core
             set => _map[position.X, position.Y] = value;
         }
 
-        public void AddEntity(Entity entity)
+        public void AddCreature(Creature entity)
         {
             if (InBounds(entity.Position))
-                _entities.Add(entity);
+                _creatures.Add(entity);
             else
                 throw new ArgumentException();
         }
 
-        public Vector2 GetRandomTileByCondition(Func<Tile, bool> condition)
+        public void ClearDeadCreatures()
+        {
+            _creatures.RemoveAll((entity) => entity.Health <= 0);
+        }
+
+        public void RemoveAllCreatures()
+        {
+            _creatures.Clear();
+        }
+
+        public Vector2 GetRandomPositionByCondition(Func<Tile, bool> condition)
         {
             Vector2 position = new Vector2();
             do
@@ -58,6 +68,6 @@ namespace MazeGame.Core
 
         public bool InBounds(Vector2 position) => position >= Vector2.Zero && position < _worldSize;
 
-        public ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
+        public ReadOnlyCollection<Creature> Creatures => _creatures.AsReadOnly();
     }
 }

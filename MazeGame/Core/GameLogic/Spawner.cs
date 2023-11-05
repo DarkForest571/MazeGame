@@ -5,11 +5,11 @@ namespace MazeGame.Core.GameLogic
 {
     interface ISpawner
     {
-        public Entity SpawnOne();
+        public Creature SpawnOne();
 
         public void SpawnAll();
 
-        public Entity Entity { get; set; }
+        public Creature Creature { get; set; }
 
         public int Count { get; set; }
     }
@@ -17,26 +17,26 @@ namespace MazeGame.Core.GameLogic
     sealed class WorldwiseSpawner : ISpawner
     {
         private World _world;
-        private Entity _entity;
+        private Creature _creature;
         private int _count;
 
-        public WorldwiseSpawner(World world, Entity entity, int count = 5)
+        public WorldwiseSpawner(World world, Creature entity, int count = 5)
         {
             _world = world;
-            _entity = entity;
+            _creature = entity;
             _count = count;
         }
 
-        public Entity Entity { get => _entity; set => _entity = value; }
+        public Creature Creature { get => _creature; set => _creature = value; }
 
         public int Count { get => _count; set => _count = value; }
 
-        public Entity SpawnOne()
+        public Creature SpawnOne()
         {
-            _entity.Position = _world.GetRandomTileByCondition((tile) => tile is PassableTile);
-            Entity entity = _entity.Clone();
-            _world.AddEntity(entity);
-            return entity;
+            _creature.Position = _world.GetRandomPositionByCondition((tile) => tile is PassableTile);
+            Creature creature = _creature.Clone();
+            _world.AddCreature(creature);
+            return creature;
         }
 
         public void SpawnAll()

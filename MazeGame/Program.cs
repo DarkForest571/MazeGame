@@ -11,7 +11,7 @@ internal class Program
         
         Game gameInstance = new Game(new (worldWidth, worldHight));
 
-        gameInstance.Init();
+        gameInstance.InitGame();
 
         gameInstance.RunGameLoop(framesPerSecond);
     }
