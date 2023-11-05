@@ -1,7 +1,11 @@
-﻿namespace MazeGame.Core.GameLogic
+﻿using MazeGame.Core.GameObjects;
+
+namespace MazeGame.Core.GameLogic
 {
-    interface IAIController
+    interface IAIControlable
     {
-        public void UpdateAI(int framesPerSecond);
+        public void UpdateAI(World world, Player player, int framesPerSecond);
+
+        public void AIAction(World world, Player player, int framesPerSecond);
     }
 }

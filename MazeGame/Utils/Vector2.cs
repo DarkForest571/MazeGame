@@ -1,4 +1,7 @@
-﻿namespace MazeGame.Utils
+﻿using MazeGame.Core.GameObjects;
+using System.Numerics;
+
+namespace MazeGame.Utils
 {
     struct Vector2
     {
@@ -31,6 +34,10 @@
 
         public static bool operator >=(Vector2 left, Vector2 right) => left.X >= right.X && left.Y >= right.Y;
 
+        public static bool operator ==(Vector2 left, Vector2 right) => left.X == right.X && left.Y == right.Y;
+
+        public static bool operator !=(Vector2 left, Vector2 right) => !(left == right);
+
 
         public static Vector2 operator -(Vector2 left, Vector2 right) => new(left.X - right.X, left.Y - right.Y);
 
@@ -50,6 +57,31 @@
 
         public static Vector2 operator /(Vector2 left, float right) => new((int)(left.X / right), (int)(left.Y / right));
 
+
+        public static Direction GetDirection(Vector2 position, Vector2 target)
+        {
+            if (position == target)
+                return Direction.None;
+
+            Vector2 delta = position - target;
+
+            if (delta.Y < delta.X || delta.Y == 0)
+            {
+                if (delta.X > 0)
+                    return Direction.Left;
+                else
+                    return Direction.Right;
+            }
+            
+            if(delta.Y > delta.X || delta.X == 0)
+            {
+                if (delta.Y > 0)
+                    return Direction.Up;
+                else
+                    return Direction.Down;
+            }
+            throw new NotImplementedException();
+        }
 
         public static Vector2 FromDirection(Direction direction) =>
             direction switch

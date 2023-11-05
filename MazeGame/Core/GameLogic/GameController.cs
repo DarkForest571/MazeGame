@@ -11,7 +11,7 @@ namespace MazeGame.Core.GameLogic
 
         public void UpdateAI(int framesPerSecond);
 
-        public void UpdateEntities();
+        public void UpdateEntities(int framesPerSecond);
 
         public bool CheckWinCondition();
     }
@@ -59,13 +59,18 @@ namespace MazeGame.Core.GameLogic
         {
             foreach (Creature creature in _world.Creatures)
             {
-                creature.UpdateAI(framesPerSecond);
+                if (creature is IAIControlable)
+                    ((IAIControlable)creature).UpdateAI(_world, _currentPlayer, framesPerSecond);
             }
         }
 
-        public void UpdateEntities()
+        public void UpdateEntities(int framesPerSecond)
         {
-
+            foreach (Creature creature in _world.Creatures)
+            {
+                if (creature is IAIControlable)
+                    ((IAIControlable)creature).AIAction(_world, _currentPlayer, framesPerSecond);
+            }
         }
 
         public bool CheckWinCondition()
