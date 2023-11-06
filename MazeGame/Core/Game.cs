@@ -18,6 +18,7 @@ namespace MazeGame.Core
         public Game(Vector2 worldSize)
         {
             _world = new World(worldSize);
+            //_generator = new MazeGenerator(_world, new Wall('█'), new Space(' '));
             _generator = new DefaultGenerator(_world, new Wall('█'), new Space(' '));
 
             _controller = new MazeGameController(_world,

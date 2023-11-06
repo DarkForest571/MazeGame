@@ -1,5 +1,4 @@
 ﻿using MazeGame.Core;
-using MazeGame.Core.GameLogic;
 
 internal class Program
 {

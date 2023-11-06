@@ -1,7 +1,4 @@
-﻿using MazeGame.Core.GameObjects;
-using System.Numerics;
-
-namespace MazeGame.Utils
+﻿namespace MazeGame.Utils
 {
     struct Vector2
     {
@@ -58,6 +55,14 @@ namespace MazeGame.Utils
         public static Vector2 operator /(Vector2 left, float right) => new((int)(left.X / right), (int)(left.Y / right));
 
 
+        public static int SqDistance(Vector2 left, Vector2 right)
+        {
+            int x = left.X - right.X;
+            int y = left.Y - right.Y;
+            return x * x + y * y;
+        }
+
+
         public static Direction GetDirection(Vector2 position, Vector2 target)
         {
             if (position == target)
@@ -65,15 +70,15 @@ namespace MazeGame.Utils
 
             Vector2 delta = target - position;
 
-            if (delta.Y == 0)
+            if (delta.Y == 0 || Math.Abs(delta.X) > Math.Abs(delta.Y))
             {
                 if (delta.X > 0)
                     return Direction.Right;
                 else
                     return Direction.Left;
             }
-            
-            if(delta.X == 0)
+
+            if (delta.X == 0 || Math.Abs(delta.X) <= Math.Abs(delta.Y))
             {
                 if (delta.Y > 0)
                     return Direction.Down;
