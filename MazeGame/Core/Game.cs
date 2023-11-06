@@ -37,8 +37,8 @@ namespace MazeGame.Core
             _finalHatch = new Tile('#', true, (int)(1.0 * framesPerSecond));
             _grave = new Tile('†', true, (int)(0.25 * framesPerSecond));
 
-            //_generator = new MazeGenerator(_world, new Wall('█'), new Space(' '));
-            _generator = new DefaultGenerator(_world, wall, space);
+            _generator = new MazeGenerator(_world, wall, space);
+            //_generator = new DefaultGenerator(_world, wall, space);
 
             _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', '/'), 1);
             _enemySpawners = new List<ISpawner>
@@ -68,7 +68,7 @@ namespace MazeGame.Core
             _finalHatchPosition = _world.GetRandomPositionByCondition((tile) => tile.IsPassable);
             _world[_finalHatchPosition] = _finalHatch;
 
-            _world.RemoveAllEntities();
+            _world.ClearAllEntities();
             _currentPlayer = (Player)_playerSpawner.SpawnOne();
             foreach (ISpawner spawner in _enemySpawners)
                 spawner.SpawnAll();

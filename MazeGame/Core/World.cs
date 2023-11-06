@@ -52,7 +52,7 @@ namespace MazeGame.Core
             _entities.RemoveAll((entity) => entity.Health <= 0);
         }
 
-        public void RemoveAllEntities()
+        public void ClearAllEntities()
         {
             _entities.Clear();
         }
