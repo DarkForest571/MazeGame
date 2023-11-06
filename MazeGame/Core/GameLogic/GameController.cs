@@ -5,6 +5,8 @@ namespace MazeGame.Core.GameLogic
 {
     interface IGameController
     {
+        public bool ExitCommand { get; }
+
         public void InitLevel();
 
         public void AddSpawner(ISpawner spawner);
@@ -14,28 +16,39 @@ namespace MazeGame.Core.GameLogic
         public void UpdateEntities(int framesPerSecond);
 
         public bool CheckWinCondition();
+
+        public void HandleInput();
     }
 
     sealed class MazeGameController : IGameController
     {
         private World _world;
+        private ISpawner _playerSpawner;
+        private Player _currentPlayer;
 
         private FinalHatch _finalHatch;
         private Grave _grave;
 
-        private ISpawner _playerSpawner;
-        private Player _currentPlayer;
-
         private List<ISpawner> _enemySpawners;
+        private LinkedList<PlayerCommand> _playerCommands;
+
+        bool _exitCommand;
 
         public MazeGameController(World world, Player player, FinalHatch finalHatch, Grave grave)
         {
             _world = world;
             _playerSpawner = new WorldwiseSpawner(world, player, 1);
+
             _finalHatch = finalHatch;
             _grave = grave;
+
             _enemySpawners = new List<ISpawner>();
+            _playerCommands = new LinkedList<PlayerCommand>();
+
+            _exitCommand = false;
         }
+
+        public bool ExitCommand => _exitCommand;
 
         public void InitLevel()
         {
@@ -76,6 +89,37 @@ namespace MazeGame.Core.GameLogic
         public bool CheckWinCondition()
         {
             return _world[_currentPlayer.Position] is FinalHatch;
+        }
+
+        public void HandleInput()
+        {
+
+            while (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey();
+
+                switch (consoleKeyInfo.Key)
+                {
+                    case ConsoleKey.W:
+                        _playerCommands.AddLast(PlayerCommand.GoUp);
+                        break;
+                    case ConsoleKey.A:
+                        _playerCommands.AddLast(PlayerCommand.GoLeft);
+                        break;
+                    case ConsoleKey.S:
+                        _playerCommands.AddLast(PlayerCommand.GoDown);
+                        break;
+                    case ConsoleKey.D:
+                        _playerCommands.AddLast(PlayerCommand.GoRight);
+                        break;
+                    case ConsoleKey.Spacebar:
+                        _playerCommands.AddLast(PlayerCommand.Attack);
+                        break;
+                    case ConsoleKey.Escape:
+                        _exitCommand = true;
+                        break;
+                }
+            }
         }
     }
 }

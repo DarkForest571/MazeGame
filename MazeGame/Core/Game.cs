@@ -54,27 +54,22 @@ namespace MazeGame.Core
             double msPerFrame = 1000.0 / framesPerSecond;
             long deltaMicroseconds = (long)(msPerFrame * 10000);
 
-            bool run = true;
             char[] bar = new char[20];
 
             long frame = 0;
             long lag = -1;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            while (run)
+            while (!_controller.ExitCommand)
             {
+                // Input processing
 
-                // InputProcessing
+                _controller.HandleInput();
 
                 lag = stopwatch.ElapsedTicks;
-
                 if (lag >= deltaMicroseconds)
                 {
                     stopwatch.Restart();
-                    if (frame % framesPerSecond == 0)
-                    {
-                        //
-                    }
 
                     // Game logic
 
@@ -104,6 +99,8 @@ namespace MazeGame.Core
                     ++frame;
                 }
             }
+
+            Console.Clear();
         }
 
         private void RenderScene()

@@ -1,5 +1,4 @@
 ﻿using MazeGame.Core.GameObjects;
-using MazeGame.Utils;
 
 namespace MazeGame.Core.GameLogic
 {

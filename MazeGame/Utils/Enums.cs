@@ -8,4 +8,16 @@
         Left,
         None
     }
+
+    enum PlayerCommand
+    {
+        GoUp,
+        GoRight,
+        GoDown,
+        GoLeft,
+
+        Attack,
+
+        Exit
+    }
 }
