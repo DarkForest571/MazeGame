@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+
 using MazeGame.Core.GameLogic;
 using MazeGame.Core.GameObjects;
 using MazeGame.Graphics;
@@ -16,7 +17,7 @@ namespace MazeGame.Core
 
         private Vector2 _finalHatchPosition;
         private Tile _finalHatch;
-        private Tile _gravePrefab;
+        private Tile _grave;
 
         private Player _currentPlayer;
         private LinkedList<PlayerCommand> _playerCommands;
@@ -30,10 +31,14 @@ namespace MazeGame.Core
         public Game(Vector2 worldSize, int framesPerSecond)
         {
             _world = new World(worldSize);
+
             Tile wall = new Tile('█', false);
-            Tile tile = new Tile(' ', true, (int)(0.1 * framesPerSecond));
+            Tile space = new Tile(' ', true, (int)(0.1 * framesPerSecond));
+            _finalHatch = new Tile('#', true, (int)(1.0 * framesPerSecond));
+            _grave = new Tile('†', true, (int)(0.25 * framesPerSecond));
+
             //_generator = new MazeGenerator(_world, new Wall('█'), new Space(' '));
-            _generator = new DefaultGenerator(_world, wall, tile);
+            _generator = new DefaultGenerator(_world, wall, space);
 
             _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', '/'), 1);
             _enemySpawners = new List<ISpawner>
@@ -41,9 +46,7 @@ namespace MazeGame.Core
                 new WorldwiseSpawner(_world, new Zombie('Z', '/'), 15),
                 new WorldwiseSpawner(_world, new Shooter('S', '-', '|'), 10)
             };
-            _finalHatch = new Tile('#', true, (int)(0.2 * framesPerSecond));
-            _gravePrefab = new Tile('†', true, (int)(0.5 * framesPerSecond));
-
+            
             _playerCommands = new LinkedList<PlayerCommand>();
             _exitCommand = false;
 
@@ -65,7 +68,7 @@ namespace MazeGame.Core
             _finalHatchPosition = _world.GetRandomPositionByCondition((tile) => tile.IsPassable);
             _world[_finalHatchPosition] = _finalHatch;
 
-            _world.RemoveAllCreatures();
+            _world.RemoveAllEntities();
             _currentPlayer = (Player)_playerSpawner.SpawnOne();
             foreach (ISpawner spawner in _enemySpawners)
                 spawner.SpawnAll();
@@ -109,6 +112,9 @@ namespace MazeGame.Core
                     // Render
                     RenderScene();
 
+                    if(CheckWinCondition())
+                        RestartLevel();
+
                     ++frame;
                 }
             }
@@ -116,10 +122,10 @@ namespace MazeGame.Core
             Console.Clear();
         }
 
-        public void UpdateScene()
+        private void UpdateScene()
         {
             UpdateAI(_framesPerSecond);
-            UpdateCreatures(_framesPerSecond);
+            UpdateEntities(_framesPerSecond);
         }
 
         private void RenderScene()
@@ -134,30 +140,30 @@ namespace MazeGame.Core
             _UIRenderer.Render();
         }
 
-        public bool CheckWinCondition()
+        private bool CheckWinCondition()
         {
             return _currentPlayer.Position == _finalHatchPosition;
         }
 
-        public void UpdateAI(int framesPerSecond)
+        private void UpdateAI(int framesPerSecond)
         {
-            foreach (Creature creature in _world.Creatures)
+            foreach (Entity entity in _world.Entities)
             {
-                if (creature is IAIControlable)
-                    ((IAIControlable)creature).UpdateAI(_world, _currentPlayer, framesPerSecond);
+                if (entity is IAIControlable)
+                    ((IAIControlable)entity).UpdateAI(_world, _currentPlayer, framesPerSecond);
             }
         }
 
-        public void UpdateCreatures(int framesPerSecond)
+        private void UpdateEntities(int framesPerSecond)
         {
-            foreach (Creature creature in _world.Creatures)
+            foreach (Entity entity in _world.Entities)
             {
-                creature.UpdateMoveTimer();
+                entity.UpdateMoveTimer();
 
-                if (creature is IAIControlable)
-                    ((IAIControlable)creature).AIAction(_world, _currentPlayer, framesPerSecond);
+                if (entity is IAIControlable)
+                    ((IAIControlable)entity).AIAction(_world, _currentPlayer, framesPerSecond);
 
-                if (creature is Player)
+                if (entity is Player)
                 {
                     foreach (PlayerCommand command in _playerCommands)
                     {

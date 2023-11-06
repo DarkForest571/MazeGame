@@ -3,7 +3,7 @@ using MazeGame.Utils;
 
 namespace MazeGame.Core.GameObjects
 {
-    sealed class Zombie : Creature, IAIControlable
+    sealed class Zombie : Entity, IAIControlable
     {
         private char _attackImage;
 

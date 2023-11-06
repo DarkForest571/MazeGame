@@ -2,7 +2,7 @@
 
 namespace MazeGame.Core.GameObjects
 {
-    abstract class Creature : GameObject
+    abstract class Entity : GameObject
     {
         private Vector2 _position;
         private int _moveTimer;
@@ -12,7 +12,7 @@ namespace MazeGame.Core.GameObjects
         private int _health;
         private int _attackTimer;
 
-        public Creature(char entityImage,
+        public Entity(char entityImage,
                        Vector2 position,
                        int health,
                        float moveSpeed) : base(entityImage)
@@ -40,7 +40,7 @@ namespace MazeGame.Core.GameObjects
             set => _attackTimer = Math.Max(value, 1);
         }
 
-        public abstract override Creature Clone();
+        public abstract override Entity Clone();
 
         public virtual void MoveTo(Direction direction, int moveCost)
         {

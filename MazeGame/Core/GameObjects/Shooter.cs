@@ -3,7 +3,7 @@ using MazeGame.Utils;
 
 namespace MazeGame.Core.GameObjects
 {
-    sealed class Shooter : Creature, IAIControlable
+    sealed class Shooter : Entity, IAIControlable
     {
         private char _horizontalAttackImage;
         private char _verticalAtackImage;

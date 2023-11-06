@@ -2,7 +2,7 @@
 
 namespace MazeGame.Core.GameObjects
 {
-    sealed class Player : Creature
+    sealed class Player : Entity
     {
         private char _attackImage;
 

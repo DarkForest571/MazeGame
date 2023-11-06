@@ -9,8 +9,8 @@ namespace MazeGame.Core
     {
         private Vector2 _worldSize;
 
-        private Tile[,] _map;
-        private List<Creature> _creatures;
+        private Tile[,] _tileMap;
+        private List<Entity> _entities;
 
         public World(Vector2 worldSize)
         {
@@ -19,40 +19,42 @@ namespace MazeGame.Core
             else
                 throw new ArgumentException();
 
-            _map = new Tile[worldSize.X, worldSize.Y];
-            _creatures = new List<Creature>();
+            _tileMap = new Tile[worldSize.X, worldSize.Y];
+            _entities = new List<Entity>();
         }
 
         public Vector2 Size { get => _worldSize; }
 
+        public ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
+
         public Tile this[int x, int y]
         {
-            get => _map[x, y];
-            set => _map[x, y] = value;
+            get => _tileMap[x, y];
+            set => _tileMap[x, y] = value;
         }
 
         public Tile this[Vector2 position]
         {
-            get => _map[position.X, position.Y];
-            set => _map[position.X, position.Y] = value;
+            get => _tileMap[position.X, position.Y];
+            set => _tileMap[position.X, position.Y] = value;
         }
 
-        public void AddCreature(Creature entity)
+        public void AddEntity(Entity entity)
         {
             if (InBounds(entity.Position))
-                _creatures.Add(entity);
+                _entities.Add(entity);
             else
                 throw new ArgumentException();
         }
 
-        public void ClearDeadCreatures()
+        public void ClearDeadEntities()
         {
-            _creatures.RemoveAll((entity) => entity.Health <= 0);
+            _entities.RemoveAll((entity) => entity.Health <= 0);
         }
 
-        public void RemoveAllCreatures()
+        public void RemoveAllEntities()
         {
-            _creatures.Clear();
+            _entities.Clear();
         }
 
         public List<Direction> GetNeighborsByCondition(Vector2 position, Func<Tile, bool> condition)
@@ -83,7 +85,5 @@ namespace MazeGame.Core
         }
 
         public bool InBounds(Vector2 position) => position >= Vector2.Zero && position < _worldSize;
-
-        public ReadOnlyCollection<Creature> Creatures => _creatures.AsReadOnly();
     }
 }
