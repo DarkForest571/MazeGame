@@ -5,6 +5,10 @@ namespace MazeGame.Core.GameObjects
 {
     sealed class Shooter : Creature, IAIControlable
     {
+        private char _horizontalAttackImage;
+        private char _verticalAtackImage;
+        private int _shootDistance;
+
         private int _idleFramesTimer;
         private int _idleSecondsFrom;
         private int _idleSecondsTo;
@@ -14,13 +18,18 @@ namespace MazeGame.Core.GameObjects
         private Vector2 _targetPosition;
 
         public Shooter(char image,
-                       Vector2 position = default,
+                      char horizontalAttackImage,
+                      char verticalAttackImage,
+                      Vector2 position = default,
                       int health = 75,
                       float moveCoefficient = 1.25f) : base(image,
                                                            position,
                                                            health,
                                                            moveCoefficient)
         {
+            _horizontalAttackImage = horizontalAttackImage;
+            _verticalAtackImage = verticalAttackImage;
+
             _idleFramesTimer = 0;
             _idleSecondsFrom = 1;
             _idleSecondsTo = 3;
@@ -30,7 +39,12 @@ namespace MazeGame.Core.GameObjects
             _targetPosition = position;
         }
 
-        public override Shooter Clone() => new Shooter(Image, Position, Health, _moveCoefficient);
+        public override Shooter Clone() => new Shooter(Image,
+                                                       _horizontalAttackImage,
+                                                       _verticalAtackImage,
+                                                       Position,
+                                                       Health,
+                                                       _moveCoefficient);
 
         public void UpdateAI(World world, Player player, int framesPerSecond)
         {
@@ -49,11 +63,11 @@ namespace MazeGame.Core.GameObjects
                             return;
                         SetNewIdleFrames(framesPerSecond);
 
-                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile is PassableTile);
+                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable());
                         if (list.Count > 0)
                         {
                             int choise = Random.Shared.Next(list.Count);
-                            _targetPosition = Position + Vector2.FromDirection(list[choise]);
+                            _targetPosition = Position + list[choise];
                         }
                     }
                     break;
@@ -76,8 +90,6 @@ namespace MazeGame.Core.GameObjects
 
         public void AIAction(World world, Player player, int framesPerSecond)
         {
-            UpdateMoveTimer();
-
             switch (_AIstate)
             {
                 case AIState.Idle:
@@ -85,8 +97,7 @@ namespace MazeGame.Core.GameObjects
                     if (MoveTimer == 0)
                     {
                         Direction moveDirection = Vector2.GetDirection(Position, _targetPosition);
-                        MoveTo(moveDirection);
-                        SetMoveTimer(((PassableTile)world[Position]).MoveCost);
+                        MoveTo(moveDirection, world[Position + moveDirection].MoveCost);
                     }
                     break;
                 case AIState.Attack:
@@ -104,7 +115,7 @@ namespace MazeGame.Core.GameObjects
                 int max = Math.Max(player.Position.Y, Position.Y);
                 for (; min < max; min++)
                 {
-                    if (world[Position.X, min] is ImpassableTile)
+                    if (!world[Position.X, min].IsPassable())
                     {
                         visible = false;
                         break;
@@ -118,7 +129,7 @@ namespace MazeGame.Core.GameObjects
                 int max = Math.Max(player.Position.X, Position.X);
                 for (; min < max; min++)
                 {
-                    if (world[min, Position.Y] is ImpassableTile)
+                    if (!world[min, Position.Y].IsPassable())
                     {
                         visible = false;
                         break;
@@ -131,6 +142,14 @@ namespace MazeGame.Core.GameObjects
         private void SetNewIdleFrames(int framesPerSecond)
         {
             _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
+        }
+
+        public override Projectile GetAttackProjectile()
+        {
+            if (AttackDirection == Direction.Left || AttackDirection == Direction.Right)
+                return new Projectile(_horizontalAttackImage, Position + AttackDirection, AttackDirection, _shootDistance);
+            else
+                return new Projectile(_verticalAtackImage, Position + AttackDirection, AttackDirection, _shootDistance);
         }
     }
 }

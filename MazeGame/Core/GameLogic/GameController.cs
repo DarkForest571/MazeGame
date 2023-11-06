@@ -54,7 +54,7 @@ namespace MazeGame.Core.GameLogic
         {
             _world.RemoveAllCreatures();
 
-            Vector2 position = _world.GetRandomPositionByCondition((tile) => tile is PassableTile);
+            Vector2 position = _world.GetRandomPositionByCondition((tile) => tile.IsPassable());
             _world[position] = _finalHatch;
 
             _currentPlayer = (Player)_playerSpawner.SpawnOne();
@@ -81,8 +81,42 @@ namespace MazeGame.Core.GameLogic
         {
             foreach (Creature creature in _world.Creatures)
             {
+                creature.UpdateMoveTimer();
+
                 if (creature is IAIControlable)
                     ((IAIControlable)creature).AIAction(_world, _currentPlayer, framesPerSecond);
+
+                if (creature is Player)
+                {
+                    foreach (PlayerCommand command in _playerCommands)
+                    {
+                        switch (command)
+                        {
+                            case PlayerCommand.GoUp:
+                            case PlayerCommand.GoRight:
+                            case PlayerCommand.GoDown:
+                            case PlayerCommand.GoLeft:
+                                Direction directionToMove = command switch
+                                {
+                                    PlayerCommand.GoUp => Direction.Up,
+                                    PlayerCommand.GoRight => Direction.Right,
+                                    PlayerCommand.GoDown => Direction.Down,
+                                    PlayerCommand.GoLeft => Direction.Left
+                                };
+                                List<Direction> availableDirections = 
+                                    _world.GetNeighborsByCondition(_currentPlayer.Position, (tile) => tile.IsPassable());
+                                if (availableDirections.Contains(directionToMove))
+                                {
+                                    _currentPlayer.MoveTo(directionToMove,
+                                        _world[_currentPlayer.Position + directionToMove].MoveCost);
+                                }
+                        break;
+                            case PlayerCommand.Attack:
+                                break;
+                        }
+                    }
+                    _playerCommands.Clear();
+                }
             }
         }
 

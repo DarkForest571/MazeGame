@@ -15,14 +15,14 @@ namespace MazeGame.Core
         private WorldRenderer _worldRenderer;
         private UIRenderer _UIRenderer;
 
-        public Game(Vector2 worldSize)
+        public Game(Vector2 worldSize, int framesPerSecond)
         {
             _world = new World(worldSize);
             //_generator = new MazeGenerator(_world, new Wall('█'), new Space(' '));
-            _generator = new DefaultGenerator(_world, new Wall('█'), new Space(' '));
+            _generator = new DefaultGenerator(_world, new Wall('█'), new Space(' ', (int)(0.1 * framesPerSecond)));
 
             _controller = new MazeGameController(_world,
-                                                 new Player('☻'),
+                                                 new Player('☻', '/'),
                                                  new FinalHatch('#'),
                                                  new Grave('†'));
 
@@ -32,8 +32,8 @@ namespace MazeGame.Core
 
         public void InitGame()
         {
-            ISpawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z'), 50);
-            ISpawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 10);
+            ISpawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z', '/'), 50);
+            ISpawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S', '-', '|'), 10);
 
             _controller.AddSpawner(zombieSpawner);
             _controller.AddSpawner(shooterSpawner);

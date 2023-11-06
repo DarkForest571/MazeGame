@@ -40,6 +40,9 @@
 
         public static Vector2 operator +(Vector2 left, Vector2 right) => new(left.X + right.X, left.Y + right.Y);
 
+        public static Vector2 operator +(Vector2 left, Direction right) =>
+            new(left.X + FromDirection(right).X, left.Y + FromDirection(right).Y);
+
 
         public static Vector2 operator *(Vector2 left, int right) => new(left.X * right, left.Y * right);
 

@@ -8,6 +8,7 @@ namespace MazeGame.Core.GameObjects
         private int _moveTimer;
         protected readonly float _moveCoefficient;
 
+        private Direction _attackDirection;
         private int _health;
         private int _attackTimer;
 
@@ -20,6 +21,7 @@ namespace MazeGame.Core.GameObjects
             _moveTimer = 0;
             _moveCoefficient = Math.Max(moveCoefficient, 0.1f);
 
+            _attackDirection = Direction.None;
             _health = Math.Max(health, 1);
             _attackTimer = 0;
         }
@@ -27,6 +29,8 @@ namespace MazeGame.Core.GameObjects
         public Vector2 Position { get => _position; set => _position = value; }
 
         protected int MoveTimer => _moveTimer;
+
+        protected Direction AttackDirection => _attackDirection;
 
         public int Health => _health;
 
@@ -38,22 +42,23 @@ namespace MazeGame.Core.GameObjects
 
         public abstract override Creature Clone();
 
-        public void MoveTo(Direction direction)
+        public virtual void MoveTo(Direction direction, int moveCost)
         {
-            _position += Vector2.FromDirection(direction);
+            if (_moveTimer == 0)
+            {
+                _moveTimer = (int)(Math.Max(moveCost, 1) / _moveCoefficient);
+                _position += direction;
+            }
         }
 
-        protected void UpdateMoveTimer()
+        public void UpdateMoveTimer()
         {
             if (_moveTimer > 0)
                 _moveTimer--;
         }
 
-        protected void SetMoveTimer(int frames)
-        {
-            _moveTimer = (int)(frames / _moveCoefficient);
-        }
+        public int TakeDamage(int damage) => _health -= Math.Max(damage, 0);
 
-        public int DealDamage(int damage) => _health -= Math.Max(damage, 0);
+        public abstract Projectile GetAttackProjectile();
     }
 }

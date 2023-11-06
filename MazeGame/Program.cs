@@ -8,7 +8,7 @@ internal class Program
         const int worldHight = 25;
         const int framesPerSecond = 50;
         
-        Game gameInstance = new Game(new (worldWidth, worldHight));
+        Game gameInstance = new Game(new (worldWidth, worldHight), framesPerSecond);
 
         gameInstance.InitGame();
 

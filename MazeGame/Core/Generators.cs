@@ -68,10 +68,10 @@ namespace MazeGame.Core
         {
             base.Generate();
 
-            //if (world.Size.X % 2 == 0)
-            //    VerticalLine(world, _border, new(world.Size.X - 2, 1), world.Size.Y - 2);
-            //if (world.Size.Y % 2 == 0)
-            //    HorizontalLine(world, _border, new(1, world.Size.Y - 2), world.Size.X - 2);
+            if (_world.Size.X % 2 == 0)
+                VerticalLine(_world, _border, new(_world.Size.X - 2, 1), _world.Size.Y - 2);
+            if (_world.Size.Y % 2 == 0)
+                HorizontalLine(_world, _border, new(1, _world.Size.Y - 2), _world.Size.X - 2);
 
             int maxX = (_world.Size.X - 1) / 2;
             int maxY = (_world.Size.Y - 1) / 2;
@@ -94,22 +94,22 @@ namespace MazeGame.Core
                 // TODO flush this and create function for this
                 if (position.Y / 2 - 1 >= 0
                     && !mask[position.X / 2, position.Y / 2 - 1]
-                    && (_world[position.X, position.Y - 1] is PassableTile || rollBack))
+                    && (_world[position.X, position.Y - 1].IsPassable() || rollBack))
                     availableDirections.Add(Direction.Up);
 
                 if (position.X / 2 + 1 < maxX
                     && !mask[position.X / 2 + 1, position.Y / 2]
-                    && (_world[position.X + 1, position.Y] is PassableTile || rollBack))
+                    && (_world[position.X + 1, position.Y].IsPassable() || rollBack))
                     availableDirections.Add(Direction.Right);
 
                 if (position.Y / 2 + 1 < maxY
                     && !mask[position.X / 2, position.Y / 2 + 1]
-                    && (_world[position.X, position.Y + 1] is PassableTile || rollBack))
+                    && (_world[position.X, position.Y + 1].IsPassable() || rollBack))
                     availableDirections.Add(Direction.Down);
 
                 if (position.X / 2 - 1 >= 0
                     && !mask[position.X / 2 - 1, position.Y / 2]
-                    && (_world[position.X - 1, position.Y] is PassableTile || rollBack))
+                    && (_world[position.X - 1, position.Y].IsPassable() || rollBack))
                     availableDirections.Add(Direction.Left);
 
                 mask[position.X / 2, position.Y / 2] = true;
@@ -123,7 +123,7 @@ namespace MazeGame.Core
                     {
                         if (i != choise)
                         {
-                            Vector2 newPosition = position + Vector2.FromDirection(availableDirections[i]);
+                            Vector2 newPosition = position + availableDirections[i];
                             _world[newPosition] = _border;
                         }
                     }
