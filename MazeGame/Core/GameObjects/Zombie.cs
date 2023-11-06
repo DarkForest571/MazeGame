@@ -19,10 +19,10 @@ namespace MazeGame.Core.GameObjects
                       char attackImage,
                       Vector2 position = default,
                       int health = 150,
-                      float moveCoefficient = 0.5f) : base(zombieImage,
+                      float moveSpeed = 0.25f) : base(zombieImage,
                                                            position,
                                                            health,
-                                                           moveCoefficient)
+                                                           moveSpeed)
         {
             _attackImage = attackImage;
 
@@ -54,7 +54,7 @@ namespace MazeGame.Core.GameObjects
                             return;
                         SetNewIdleFrames(framesPerSecond);
 
-                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable());
+                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable);
                         if (list.Count > 0)
                         {
                             int choise = Random.Shared.Next(list.Count);
@@ -106,7 +106,7 @@ namespace MazeGame.Core.GameObjects
                 int max = Math.Max(player.Position.Y, Position.Y);
                 for (; min < max; min++)
                 {
-                    if (!world[Position.X, min].IsPassable())
+                    if (!world[Position.X, min].IsPassable)
                     {
                         visible = false;
                         break;
@@ -120,7 +120,7 @@ namespace MazeGame.Core.GameObjects
                 int max = Math.Max(player.Position.X, Position.X);
                 for (; min < max; min++)
                 {
-                    if (!world[min, Position.Y].IsPassable())
+                    if (!world[min, Position.Y].IsPassable)
                     {
                         visible = false;
                         break;

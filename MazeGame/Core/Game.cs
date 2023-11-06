@@ -14,6 +14,10 @@ namespace MazeGame.Core
         private ISpawner _playerSpawner;
         private List<ISpawner> _enemySpawners;
 
+        private Vector2 _finalHatchPosition;
+        private Tile _finalHatch;
+        private Tile _gravePrefab;
+
         private Player _currentPlayer;
         private LinkedList<PlayerCommand> _playerCommands;
         private bool _exitCommand;
@@ -26,8 +30,10 @@ namespace MazeGame.Core
         public Game(Vector2 worldSize, int framesPerSecond)
         {
             _world = new World(worldSize);
+            Tile wall = new Tile('█', false);
+            Tile tile = new Tile(' ', true, (int)(0.1 * framesPerSecond));
             //_generator = new MazeGenerator(_world, new Wall('█'), new Space(' '));
-            _generator = new DefaultGenerator(_world, new Wall('█'), new Space(' ', (int)(0.2 * framesPerSecond)));
+            _generator = new DefaultGenerator(_world, wall, tile);
 
             _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', '/'), 1);
             _enemySpawners = new List<ISpawner>
@@ -35,7 +41,8 @@ namespace MazeGame.Core
                 new WorldwiseSpawner(_world, new Zombie('Z', '/'), 15),
                 new WorldwiseSpawner(_world, new Shooter('S', '-', '|'), 10)
             };
-            // new Grave('†'));
+            _finalHatch = new Tile('#', true, (int)(0.2 * framesPerSecond));
+            _gravePrefab = new Tile('†', true, (int)(0.5 * framesPerSecond));
 
             _playerCommands = new LinkedList<PlayerCommand>();
             _exitCommand = false;
@@ -55,8 +62,8 @@ namespace MazeGame.Core
         private void RestartLevel()
         {
             _generator.Generate();
-            Vector2 position = _world.GetRandomPositionByCondition((tile) => tile.IsPassable());
-            _world[position] = new FinalHatch('#', _framesPerSecond);
+            _finalHatchPosition = _world.GetRandomPositionByCondition((tile) => tile.IsPassable);
+            _world[_finalHatchPosition] = _finalHatch;
 
             _world.RemoveAllCreatures();
             _currentPlayer = (Player)_playerSpawner.SpawnOne();
@@ -129,7 +136,7 @@ namespace MazeGame.Core
 
         public bool CheckWinCondition()
         {
-            return _world[_currentPlayer.Position] is FinalHatch;
+            return _currentPlayer.Position == _finalHatchPosition;
         }
 
         public void UpdateAI(int framesPerSecond)
@@ -168,7 +175,7 @@ namespace MazeGame.Core
                                     PlayerCommand.GoLeft => Direction.Left
                                 };
                                 List<Direction> availableDirections =
-                                    _world.GetNeighborsByCondition(_currentPlayer.Position, (tile) => tile.IsPassable());
+                                    _world.GetNeighborsByCondition(_currentPlayer.Position, (tile) => tile.IsPassable);
                                 if (availableDirections.Contains(directionToMove))
                                 {
                                     _currentPlayer.MoveTo(directionToMove,

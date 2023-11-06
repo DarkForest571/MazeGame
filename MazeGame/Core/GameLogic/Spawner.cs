@@ -32,7 +32,7 @@ namespace MazeGame.Core.GameLogic
 
         public Creature SpawnOne()
         {
-            _creature.Position = _world.GetRandomPositionByCondition((tile) => tile.IsPassable());
+            _creature.Position = _world.GetRandomPositionByCondition((tile) => tile.IsPassable);
             Creature creature = _creature.Clone();
             _world.AddCreature(creature);
             return creature;

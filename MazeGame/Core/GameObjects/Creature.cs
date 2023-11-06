@@ -15,11 +15,11 @@ namespace MazeGame.Core.GameObjects
         public Creature(char entityImage,
                        Vector2 position,
                        int health,
-                       float moveCoefficient) : base(entityImage)
+                       float moveSpeed) : base(entityImage)
         {
             _position = position;
             _moveTimer = 0;
-            _moveCoefficient = Math.Max(moveCoefficient, 0.1f);
+            _moveCoefficient = Math.Max(moveSpeed, 0.1f);
 
             _attackDirection = Direction.None;
             _health = Math.Max(health, 1);
