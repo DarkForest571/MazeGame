@@ -10,48 +10,63 @@ namespace MazeGame.Core
     {
         private World _world;
         private IGenerator _generator;
-        private IGameController _controller;
+
+        private ISpawner _playerSpawner;
+        private List<ISpawner> _enemySpawners;
+
+        private Player _currentPlayer;
+        private LinkedList<PlayerCommand> _playerCommands;
+        private bool _exitCommand;
 
         private WorldRenderer _worldRenderer;
         private UIRenderer _UIRenderer;
+
+        private int _framesPerSecond;
 
         public Game(Vector2 worldSize, int framesPerSecond)
         {
             _world = new World(worldSize);
             //_generator = new MazeGenerator(_world, new Wall('█'), new Space(' '));
-            _generator = new DefaultGenerator(_world, new Wall('█'), new Space(' ', (int)(0.1 * framesPerSecond)));
+            _generator = new DefaultGenerator(_world, new Wall('█'), new Space(' ', (int)(0.2 * framesPerSecond)));
 
-            _controller = new MazeGameController(_world,
-                                                 new Player('☻', '/'),
-                                                 new FinalHatch('#'),
-                                                 new Grave('†'));
+            _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', '/'), 1);
+            _enemySpawners = new List<ISpawner>
+            {
+                new WorldwiseSpawner(_world, new Zombie('Z', '/'), 15),
+                new WorldwiseSpawner(_world, new Shooter('S', '-', '|'), 10)
+            };
+            // new Grave('†'));
+
+            _playerCommands = new LinkedList<PlayerCommand>();
+            _exitCommand = false;
 
             _worldRenderer = new WorldRenderer(_world, worldSize);
             _UIRenderer = new UIRenderer(new(21, 8), new Vector2(worldSize.X, 0));
+            _UIRenderer.SetBorder('║', '═', '╔', '╗', '╝', '╚');
+
+            _framesPerSecond = framesPerSecond;
         }
 
         public void InitGame()
         {
-            ISpawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z', '/'), 50);
-            ISpawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S', '-', '|'), 10);
-
-            _controller.AddSpawner(zombieSpawner);
-            _controller.AddSpawner(shooterSpawner);
-
-            _UIRenderer.SetBorder('║', '═', '╔', '╗', '╝', '╚');
-
             RestartLevel();
         }
 
         private void RestartLevel()
         {
             _generator.Generate();
-            _controller.InitLevel();
+            Vector2 position = _world.GetRandomPositionByCondition((tile) => tile.IsPassable());
+            _world[position] = new FinalHatch('#', _framesPerSecond);
+
+            _world.RemoveAllCreatures();
+            _currentPlayer = (Player)_playerSpawner.SpawnOne();
+            foreach (ISpawner spawner in _enemySpawners)
+                spawner.SpawnAll();
         }
 
-        public void RunGameLoop(int framesPerSecond)
+        public void RunGameLoop()
         {
-            double msPerFrame = 1000.0 / framesPerSecond;
+            double msPerFrame = 1000.0 / _framesPerSecond;
             long deltaMicroseconds = (long)(msPerFrame * 10000);
 
             char[] bar = new char[20];
@@ -60,11 +75,10 @@ namespace MazeGame.Core
             long lag = -1;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            while (!_controller.ExitCommand)
+            while (!_exitCommand)
             {
                 // Input processing
-
-                _controller.HandleInput();
+                HandleInput();
 
                 lag = stopwatch.ElapsedTicks;
                 if (lag >= deltaMicroseconds)
@@ -72,15 +86,11 @@ namespace MazeGame.Core
                     stopwatch.Restart();
 
                     // Game logic
+                    UpdateScene();
 
-                    _controller.UpdateAI(framesPerSecond);
-                    _controller.UpdateEntities(framesPerSecond);
-
-                    // Game logic end
                     // Logs
-
-                    float FPS = deltaMicroseconds / (float)lag * framesPerSecond;
-                    int barLength = (int)(frame % framesPerSecond * 20 / framesPerSecond);
+                    float FPS = deltaMicroseconds / (float)lag * _framesPerSecond;
+                    int barLength = (int)(frame % _framesPerSecond * 20 / _framesPerSecond);
                     if (barLength == 0)
                         for (int i = 0; i < 20; i++)
                             bar[i] = ' ';
@@ -89,18 +99,20 @@ namespace MazeGame.Core
 
                     _UIRenderer.SetUIData($"{FPS,6:F3} FPS\n{(lag / 10),6:D} mics/frame\n" + new string(bar));
 
-                    // Logs end
                     // Render
-
                     RenderScene();
-
-                    // Render end
 
                     ++frame;
                 }
             }
 
             Console.Clear();
+        }
+
+        public void UpdateScene()
+        {
+            UpdateAI(_framesPerSecond);
+            UpdateCreatures(_framesPerSecond);
         }
 
         private void RenderScene()
@@ -113,6 +125,94 @@ namespace MazeGame.Core
             _UIRenderer.ClearBuffer();
             _UIRenderer.DataToBuffer(true);
             _UIRenderer.Render();
+        }
+
+        public bool CheckWinCondition()
+        {
+            return _world[_currentPlayer.Position] is FinalHatch;
+        }
+
+        public void UpdateAI(int framesPerSecond)
+        {
+            foreach (Creature creature in _world.Creatures)
+            {
+                if (creature is IAIControlable)
+                    ((IAIControlable)creature).UpdateAI(_world, _currentPlayer, framesPerSecond);
+            }
+        }
+
+        public void UpdateCreatures(int framesPerSecond)
+        {
+            foreach (Creature creature in _world.Creatures)
+            {
+                creature.UpdateMoveTimer();
+
+                if (creature is IAIControlable)
+                    ((IAIControlable)creature).AIAction(_world, _currentPlayer, framesPerSecond);
+
+                if (creature is Player)
+                {
+                    foreach (PlayerCommand command in _playerCommands)
+                    {
+                        switch (command)
+                        {
+                            case PlayerCommand.GoUp:
+                            case PlayerCommand.GoRight:
+                            case PlayerCommand.GoDown:
+                            case PlayerCommand.GoLeft:
+                                Direction directionToMove = command switch
+                                {
+                                    PlayerCommand.GoUp => Direction.Up,
+                                    PlayerCommand.GoRight => Direction.Right,
+                                    PlayerCommand.GoDown => Direction.Down,
+                                    PlayerCommand.GoLeft => Direction.Left
+                                };
+                                List<Direction> availableDirections =
+                                    _world.GetNeighborsByCondition(_currentPlayer.Position, (tile) => tile.IsPassable());
+                                if (availableDirections.Contains(directionToMove))
+                                {
+                                    _currentPlayer.MoveTo(directionToMove,
+                                        _world[_currentPlayer.Position + directionToMove].MoveCost);
+                                }
+                                break;
+                            case PlayerCommand.Attack:
+                                break;
+                        }
+                    }
+                    _playerCommands.Clear();
+                }
+            }
+        }
+
+        private void HandleInput()
+        {
+
+            while (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
+
+                switch (consoleKeyInfo.Key)
+                {
+                    case ConsoleKey.W:
+                        _playerCommands.AddLast(PlayerCommand.GoUp);
+                        break;
+                    case ConsoleKey.A:
+                        _playerCommands.AddLast(PlayerCommand.GoLeft);
+                        break;
+                    case ConsoleKey.S:
+                        _playerCommands.AddLast(PlayerCommand.GoDown);
+                        break;
+                    case ConsoleKey.D:
+                        _playerCommands.AddLast(PlayerCommand.GoRight);
+                        break;
+                    case ConsoleKey.Spacebar:
+                        _playerCommands.AddLast(PlayerCommand.Attack);
+                        break;
+                    case ConsoleKey.Escape:
+                        _exitCommand = true;
+                        break;
+                }
+            }
         }
     }
 }

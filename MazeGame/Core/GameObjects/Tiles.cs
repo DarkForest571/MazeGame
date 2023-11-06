@@ -6,9 +6,9 @@ namespace MazeGame.Core.GameObjects
     {
         private readonly int _moveCost;
 
-        protected Tile(char image, int moveCost = 100) : base(image)
+        protected Tile(char image, int moveCost = 1) : base(image)
         {
-            _moveCost = moveCost;
+            _moveCost = Math.Max(moveCost, 1);
         }
 
         public int MoveCost => _moveCost;
@@ -27,27 +27,27 @@ namespace MazeGame.Core.GameObjects
 
     class FinalHatch : Tile
     {
-        public FinalHatch(char tileChar, int moveCost = 50) : base(tileChar, moveCost) { }
+        public FinalHatch(char tileChar, int moveCost) : base(tileChar, moveCost) { }
 
-        public override FinalHatch Clone() => new FinalHatch(Image);
+        public override FinalHatch Clone() => new FinalHatch(Image, MoveCost);
 
         public override bool IsPassable() => true;
     }
 
     class Space : Tile
     {
-        public Space(char tileChar, int moveCost = 25) : base(tileChar, moveCost) { }
+        public Space(char tileChar, int moveCost) : base(tileChar, moveCost) { }
 
-        public override Space Clone() => new Space(Image);
+        public override Space Clone() => new Space(Image, MoveCost);
 
         public override bool IsPassable() => true;
     }
 
     class Grave : Tile
     {
-        public Grave(char tileChar, int moveCost = 35) : base(tileChar, moveCost) { }
+        public Grave(char tileChar, int moveCost) : base(tileChar, moveCost) { }
 
-        public override Grave Clone() => new Grave(Image);
+        public override Grave Clone() => new Grave(Image, MoveCost);
 
         public override bool IsPassable() => true;
     }
