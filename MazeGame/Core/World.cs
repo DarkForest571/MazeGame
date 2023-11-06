@@ -55,6 +55,22 @@ namespace MazeGame.Core
             _creatures.Clear();
         }
 
+        public List<Direction> GetNeighborsByCondition(Vector2 position, Func<Tile, bool> condition)
+        {
+            List<Direction> result = new List<Direction>();
+
+            if (condition(this[position + Vector2.Up]))
+                result.Add(Direction.Up);
+            if (condition(this[position + Vector2.Right]))
+                result.Add(Direction.Right);
+            if (condition(this[position + Vector2.Down]))
+                result.Add(Direction.Down);
+            if (condition(this[position + Vector2.Left]))
+                result.Add(Direction.Left);
+
+            return result;
+        }
+
         public Vector2 GetRandomPositionByCondition(Func<Tile, bool> condition)
         {
             Vector2 position = new Vector2();

@@ -2,6 +2,13 @@
 
 namespace MazeGame.Core.GameLogic
 {
+    enum AIState
+    {
+        Idle,
+        Follow,
+        Attack
+    }
+
     interface IAIControlable
     {
         public void UpdateAI(World world, Player player, int framesPerSecond);

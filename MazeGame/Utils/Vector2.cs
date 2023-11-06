@@ -63,22 +63,22 @@ namespace MazeGame.Utils
             if (position == target)
                 return Direction.None;
 
-            Vector2 delta = position - target;
+            Vector2 delta = target - position;
 
-            if (delta.Y < delta.X || delta.Y == 0)
+            if (delta.Y == 0)
             {
                 if (delta.X > 0)
-                    return Direction.Left;
-                else
                     return Direction.Right;
+                else
+                    return Direction.Left;
             }
             
-            if(delta.Y > delta.X || delta.X == 0)
+            if(delta.X == 0)
             {
                 if (delta.Y > 0)
-                    return Direction.Up;
-                else
                     return Direction.Down;
+                else
+                    return Direction.Up;
             }
             throw new NotImplementedException();
         }

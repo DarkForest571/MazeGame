@@ -84,9 +84,11 @@ namespace MazeGame.Core.GameObjects
 
     sealed class Zombie : Creature, IAIControlable
     {
-        private int _idleFrames;
+        private int _idleFramesTimer;
         private int _idleSecondsFrom;
         private int _idleSecondsTo;
+
+        private AIState _AIstate;
 
         private Vector2 _targetPosition;
 
@@ -98,9 +100,11 @@ namespace MazeGame.Core.GameObjects
                                                            health,
                                                            moveCoefficient)
         {
-            _idleFrames = 0;
-            _idleSecondsFrom = 2;
-            _idleSecondsTo = 5;
+            _idleFramesTimer = 0;
+            _idleSecondsFrom = 1;
+            _idleSecondsTo = 3;
+
+            _AIstate = AIState.Idle;
 
             _targetPosition = position;
         }
@@ -109,12 +113,70 @@ namespace MazeGame.Core.GameObjects
 
         public void UpdateAI(World world, Player player, int framesPerSecond)
         {
-            _idleFrames--;
-            if (_idleFrames > 0)
-                return;
+            switch (_AIstate)
+            {
+                case AIState.Idle:
+                    if (CheckPlayerVisibility(world, player))
+                    {
+                        _AIstate = AIState.Follow;
+                        _targetPosition = player.Position;
+                    }
+                    else
+                    {
+                        _idleFramesTimer--;
+                        if (_idleFramesTimer > 0)
+                            return;
+                        SetNewIdleFrames(framesPerSecond);
 
-            _idleFrames = GetNewIdleFrames(framesPerSecond);
+                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile is PassableTile);
+                        if (list.Count > 0)
+                        {
+                            int choise = Random.Shared.Next(list.Count);
+                            _targetPosition = Position + Vector2.FromDirection(list[choise]);
+                        }
+                    }
+                    break;
+                case AIState.Follow:
+                    break;
+                case AIState.Attack:
+                    break;
+            }
 
+        }
+
+        public void AIAction(World world, Player player, int framesPerSecond)
+        {
+            UpdateMoveTimer();
+            Direction moveDirection = Vector2.GetDirection(Position, _targetPosition);
+
+            switch (_AIstate)
+            {
+                case AIState.Idle:
+                    if (MoveTimer == 0)
+                    {
+                        MoveTo(moveDirection);
+                        SetMoveTimer(((PassableTile)world[Position]).MoveCost);
+                    }
+                    break;
+                case AIState.Follow:
+                    if (_targetPosition == player.Position &&
+                        Position + Vector2.FromDirection(moveDirection) == _targetPosition)
+                    {
+                        _AIstate = AIState.Attack;
+                    }
+                    else if (MoveTimer == 0)
+                    {
+                        MoveTo(moveDirection);
+                        SetMoveTimer(((PassableTile)world[Position]).MoveCost);
+                    }
+                    break;
+                case AIState.Attack:
+                    break;
+            }
+        }
+
+        private bool CheckPlayerVisibility(World world, Player player)
+        {
             bool visible = false;
             if (player.Position.X == Position.X)
             {
@@ -144,33 +206,13 @@ namespace MazeGame.Core.GameObjects
                     }
                 }
             }
-
-            if (visible)
-                _targetPosition = player.Position;
+            return visible;
         }
 
-        public void AIAction(World world, Player player, int framesPerSecond)
+        private void SetNewIdleFrames(int framesPerSecond)
         {
-            UpdateMoveTimer();
-            Direction moveDirection = Vector2.GetDirection(Position, _targetPosition);
-
-            if (Position + Vector2.FromDirection(moveDirection) == _targetPosition &&
-                _targetPosition == player.Position)
-            {
-                // Hit
-            }
-            else
-            {
-                if (MoveTimer == 0)
-                {
-                    MoveTo(moveDirection);
-                    SetMoveTimer(((PassableTile)world[Position]).MoveCost);
-                }
-            }
+            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
         }
-
-        private int GetNewIdleFrames(int framesPerSecond) =>
-            Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
     }
 
     sealed class Shooter : Creature

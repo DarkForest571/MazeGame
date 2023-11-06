@@ -32,7 +32,7 @@ namespace MazeGame.Core
         public void InitGame()
         {
             ISpawner zombieSpawner = new WorldwiseSpawner(_world, new Zombie('Z'), 50);
-            ISpawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 0);
+            ISpawner shooterSpawner = new WorldwiseSpawner(_world, new Shooter('S'), 10);
 
             _controller.AddSpawner(zombieSpawner);
             _controller.AddSpawner(shooterSpawner);
