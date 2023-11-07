@@ -2,7 +2,7 @@
 
 namespace MazeGame.Core.GameObjects
 {
-    sealed class Player : Creature
+    sealed class Player : Entity
     {
         private char _attackImage;
 
@@ -10,10 +10,10 @@ namespace MazeGame.Core.GameObjects
                       char attackImage,
                        Vector2 position = default,
                       int health = 100,
-                      float moveCoefficient = 1.0f) : base(playerImage,
+                      float moveSpeed = 1.0f) : base(playerImage,
                                                            position,
                                                            health,
-                                                           moveCoefficient)
+                                                           moveSpeed)
         {
             _attackImage = attackImage;
         }

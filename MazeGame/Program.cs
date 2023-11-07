@@ -12,6 +12,6 @@ internal class Program
 
         gameInstance.InitGame();
 
-        gameInstance.RunGameLoop(framesPerSecond);
+        gameInstance.RunGameLoop();
     }
 }
