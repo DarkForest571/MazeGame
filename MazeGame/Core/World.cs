@@ -25,7 +25,7 @@ namespace MazeGame.Core
 
         public Vector2 Size { get => _worldSize; }
 
-        public ReadOnlyCollection<Entity> Entities => _entities.AsReadOnly();
+        public IEnumerable<Entity> Entities => _entities;
 
         public Tile this[int x, int y]
         {
