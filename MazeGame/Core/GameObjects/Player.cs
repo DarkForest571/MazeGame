@@ -4,28 +4,33 @@ namespace MazeGame.Core.GameObjects
 {
     sealed class Player : Entity
     {
-        private char _attackImage;
+        private readonly Projectile _attackProjectile;
+        private Direction _attackDirection;
 
         public Player(char playerImage,
-                      char attackImage,
+                      Projectile attackProjectile,
                        Vector2 position = default,
                       int health = 100,
                       float moveSpeed = 1.0f) : base(playerImage,
-                                                           position,
-                                                           health,
-                                                           moveSpeed)
+                                                     position,
+                                                     health,
+                                                     moveSpeed)
         {
-            _attackImage = attackImage;
+            _attackProjectile = attackProjectile;
+            _attackDirection = Direction.Right;
         }
 
-        public override Player Clone() => new Player(Image, _attackImage, Position, Health, _moveCoefficient);
+        public override Player Clone() => new Player(Image, _attackProjectile, Position, Health, MoveSpeed);
 
-        public override void MoveTo(Direction direction, int moveCost)
+        public override Projectile? GetAttack()
         {
-            base.MoveTo(direction, moveCost);
+            if (AttackTimer == 0)
+            {
+                _attackProjectile.Position = Position + _attackDirection;
+                return _attackProjectile.Clone();
+            }
+            else
+                return null;
         }
-
-        public override Projectile GetAttackProjectile() =>
-            new Projectile(_attackImage, Position + AttackDirection, AttackDirection);
     }
 }

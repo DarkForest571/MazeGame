@@ -29,6 +29,7 @@ namespace MazeGame.Core
 
         public Game(Vector2 worldSize, int framesPerSecond)
         {
+            // World, tiles and generator
             _world = new World(worldSize);
 
             Tile wall = new Tile('█', false);
@@ -39,13 +40,18 @@ namespace MazeGame.Core
             _generator = new MazeGenerator(_world, wall, space);
             //_generator = new DefaultGenerator(_world, wall, space);
 
-            _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', '/'), 1);
+            // Entities, projectiles and spawners
+            Projectile meleeAttack = new Projectile('/');
+            Projectile horizontalRangeAttack = new Projectile('/');
+            Projectile verticalRangeAttack = new Projectile('/');
+            _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', meleeAttack), 1);
             _enemySpawners = new List<ISpawner>
             {
-                new WorldwiseSpawner(_world, new Zombie('Z', '/'), 15),
-                new WorldwiseSpawner(_world, new Shooter('S', '-', '|'), 10)
+                new WorldwiseSpawner(_world, new Zombie('Z', meleeAttack), 15),
+                new WorldwiseSpawner(_world, new Shooter('S', horizontalRangeAttack, verticalRangeAttack), 10)
             };
 
+            // Input and UI
             _inputHandler = new DefaultInputHandler();
 
             _worldRenderer = new WorldRenderer(_world, worldSize);
