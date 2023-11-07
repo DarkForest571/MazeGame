@@ -5,8 +5,11 @@ namespace MazeGame.Core.GameObjects
 {
     sealed class Shooter : Entity, IAIControlable
     {
-        private char _horizontalAttackImage;
-        private char _verticalAtackImage;
+        Projectile _horizontalAttackProjectile;
+        Projectile _verticalAttackProjectile;
+        private Direction _attackDirection;
+        private int _attackTimer;
+
         private int _shootDistance;
 
         private int _idleFramesTimer;
@@ -18,17 +21,19 @@ namespace MazeGame.Core.GameObjects
         private Vector2 _targetPosition;
 
         public Shooter(char image,
-                      char horizontalAttackImage,
-                      char verticalAttackImage,
+                      Projectile horizontalAttackProjectile,
+                      Projectile verticalAttackProjectile,
                       Vector2 position = default,
                       int health = 75,
                       float moveSpeed = 1.25f) : base(image,
-                                                           position,
-                                                           health,
-                                                           moveSpeed)
+                                                      position,
+                                                      health,
+                                                      moveSpeed)
         {
-            _horizontalAttackImage = horizontalAttackImage;
-            _verticalAtackImage = verticalAttackImage;
+            _horizontalAttackProjectile = horizontalAttackProjectile;
+            _verticalAttackProjectile = verticalAttackProjectile;
+            _attackDirection = Direction.Right;
+            _attackTimer = 0;
 
             _idleFramesTimer = 0;
             _idleSecondsFrom = 1;
@@ -40,18 +45,42 @@ namespace MazeGame.Core.GameObjects
         }
 
         public override Shooter Clone() => new Shooter(Image,
-                                                       _horizontalAttackImage,
-                                                       _verticalAtackImage,
+                                                       _horizontalAttackProjectile,
+                                                       _verticalAttackProjectile,
                                                        Position,
                                                        Health,
-                                                       _moveCoefficient);
+                                                       MoveSpeed);
+
+        public override Projectile? GetAttack()
+        {
+            if (_attackTimer == 0)
+            {
+                if (_attackDirection == Direction.Right || _attackDirection == Direction.Left)
+                {
+                    _horizontalAttackProjectile.Position = Position + _attackDirection;
+                    return _horizontalAttackProjectile.Clone();
+                }
+                else
+                {
+                    _verticalAttackProjectile.Position = Position + _attackDirection;
+                    return _verticalAttackProjectile.Clone();
+                }
+            }
+            else
+                return null;
+        }
+
+        private void SetNewIdleFrames(int framesPerSecond)
+        {
+            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
+        }
 
         public void UpdateAI(World world, Player player, int framesPerSecond)
         {
             switch (_AIstate)
             {
                 case AIState.Idle:
-                    if (CheckPlayerVisibility(world, player))
+                    if (CanSeeEntity(world, player))
                     {
                         _AIstate = AIState.Follow;
                         _targetPosition = player.Position;
@@ -105,51 +134,39 @@ namespace MazeGame.Core.GameObjects
             }
         }
 
-        private bool CheckPlayerVisibility(World world, Player player)
+        public bool CanSeeEntity(World world, Entity entity)
         {
-            bool visible = false;
-            if (player.Position.X == Position.X)
+            Vector2 from, to;
+            Direction deltaStep;
+            if (entity.Position.X == Position.X)
             {
-                visible = true;
-                int min = Math.Min(player.Position.Y, Position.Y);
-                int max = Math.Max(player.Position.Y, Position.Y);
-                for (; min < max; min++)
-                {
-                    if (!world[Position.X, min].IsPassable)
-                    {
-                        visible = false;
-                        break;
-                    }
-                }
+                (from, to) =
+                    entity.Position.Y <= Position.Y
+                    ? (entity.Position, Position)
+                    : (Position, entity.Position);
+                deltaStep = Direction.Down;
             }
-            else if (player.Position.Y == Position.Y)
+            else if (entity.Position.Y == Position.Y)
             {
-                visible = true;
-                int min = Math.Min(player.Position.X, Position.X);
-                int max = Math.Max(player.Position.X, Position.X);
-                for (; min < max; min++)
+                (from, to) =
+                    entity.Position.X <= Position.X
+                    ? (entity.Position, Position)
+                    : (Position, entity.Position);
+                deltaStep = Direction.Right;
+            }
+            else
+                return false;
+
+            bool visible = true;
+            for (; from != to; from += deltaStep)
+            {
+                if (!world[from].IsPassable)
                 {
-                    if (!world[min, Position.Y].IsPassable)
-                    {
-                        visible = false;
-                        break;
-                    }
+                    visible = false;
+                    break;
                 }
             }
             return visible;
-        }
-
-        private void SetNewIdleFrames(int framesPerSecond)
-        {
-            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
-        }
-
-        public override Projectile GetAttackProjectile()
-        {
-            if (AttackDirection == Direction.Left || AttackDirection == Direction.Right)
-                return new Projectile(_horizontalAttackImage, Position + AttackDirection, AttackDirection, _shootDistance);
-            else
-                return new Projectile(_verticalAtackImage, Position + AttackDirection, AttackDirection, _shootDistance);
         }
     }
 }

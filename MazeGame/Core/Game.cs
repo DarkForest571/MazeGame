@@ -20,8 +20,7 @@ namespace MazeGame.Core
         private Tile _grave;
 
         private Player _currentPlayer;
-        private LinkedList<PlayerCommand> _playerCommands;
-        private bool _exitCommand;
+        private IInputHandler _inputHandler;
 
         private WorldRenderer _worldRenderer;
         private UIRenderer _UIRenderer;
@@ -30,6 +29,7 @@ namespace MazeGame.Core
 
         public Game(Vector2 worldSize, int framesPerSecond)
         {
+            // World, tiles and generator
             _world = new World(worldSize);
 
             Tile wall = new Tile('█', false);
@@ -40,15 +40,19 @@ namespace MazeGame.Core
             _generator = new MazeGenerator(_world, wall, space);
             //_generator = new DefaultGenerator(_world, wall, space);
 
-            _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', '/'), 1);
+            // Entities, projectiles and spawners
+            Projectile meleeAttack = new Projectile('/');
+            Projectile horizontalRangeAttack = new Projectile('/');
+            Projectile verticalRangeAttack = new Projectile('/');
+            _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', meleeAttack), 1);
             _enemySpawners = new List<ISpawner>
             {
-                new WorldwiseSpawner(_world, new Zombie('Z', '/'), 15),
-                new WorldwiseSpawner(_world, new Shooter('S', '-', '|'), 10)
+                new WorldwiseSpawner(_world, new Zombie('Z', meleeAttack), 15),
+                new WorldwiseSpawner(_world, new Shooter('S', horizontalRangeAttack, verticalRangeAttack), 10)
             };
-            
-            _playerCommands = new LinkedList<PlayerCommand>();
-            _exitCommand = false;
+
+            // Input and UI
+            _inputHandler = new DefaultInputHandler();
 
             _worldRenderer = new WorldRenderer(_world, worldSize);
             _UIRenderer = new UIRenderer(new(21, 8), new Vector2(worldSize.X, 0));
@@ -85,10 +89,10 @@ namespace MazeGame.Core
             long lag = -1;
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            while (!_exitCommand)
+            while (!_inputHandler.ExitCommand)
             {
                 // Input processing
-                HandleInput();
+                _inputHandler.PullInput();
 
                 lag = stopwatch.ElapsedTicks;
                 if (lag >= deltaMicroseconds)
@@ -165,7 +169,7 @@ namespace MazeGame.Core
 
                 if (entity is Player)
                 {
-                    foreach (PlayerCommand command in _playerCommands)
+                    foreach (PlayerCommand command in _inputHandler.Commands)
                     {
                         switch (command)
                         {
@@ -192,38 +196,7 @@ namespace MazeGame.Core
                                 break;
                         }
                     }
-                    _playerCommands.Clear();
-                }
-            }
-        }
-
-        private void HandleInput()
-        {
-
-            while (Console.KeyAvailable)
-            {
-                ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
-
-                switch (consoleKeyInfo.Key)
-                {
-                    case ConsoleKey.W:
-                        _playerCommands.AddLast(PlayerCommand.GoUp);
-                        break;
-                    case ConsoleKey.A:
-                        _playerCommands.AddLast(PlayerCommand.GoLeft);
-                        break;
-                    case ConsoleKey.S:
-                        _playerCommands.AddLast(PlayerCommand.GoDown);
-                        break;
-                    case ConsoleKey.D:
-                        _playerCommands.AddLast(PlayerCommand.GoRight);
-                        break;
-                    case ConsoleKey.Spacebar:
-                        _playerCommands.AddLast(PlayerCommand.Attack);
-                        break;
-                    case ConsoleKey.Escape:
-                        _exitCommand = true;
-                        break;
+                    _inputHandler.ClearCommands();
                 }
             }
         }
