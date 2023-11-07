@@ -9,8 +9,6 @@ namespace MazeGame.Core.GameObjects
         private readonly float _moveSpeed;
         private int _moveTimer;
 
-        private int _attackTimer;
-
         private int _health;
 
         public Entity(char entityImage,
@@ -22,8 +20,6 @@ namespace MazeGame.Core.GameObjects
             _moveSpeed = Math.Max(moveSpeed, 0.1f);
             _moveTimer = 0;
 
-            _attackTimer = 0;
-
             _health = Math.Max(health, 1);
         }
 
@@ -32,12 +28,6 @@ namespace MazeGame.Core.GameObjects
         protected float MoveSpeed => _moveSpeed;
 
         protected int MoveTimer => _moveTimer;
-
-        protected int AttackTimer
-        {
-            get => _attackTimer;
-            set => _attackTimer = Math.Max(value, 1);
-        }
 
         public int Health => _health;
 

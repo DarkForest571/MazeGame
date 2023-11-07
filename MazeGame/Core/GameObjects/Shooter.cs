@@ -8,6 +8,7 @@ namespace MazeGame.Core.GameObjects
         Projectile _horizontalAttackProjectile;
         Projectile _verticalAttackProjectile;
         private Direction _attackDirection;
+        private int _attackTimer;
 
         private int _shootDistance;
 
@@ -32,6 +33,7 @@ namespace MazeGame.Core.GameObjects
             _horizontalAttackProjectile = horizontalAttackProjectile;
             _verticalAttackProjectile = verticalAttackProjectile;
             _attackDirection = Direction.Right;
+            _attackTimer = 0;
 
             _idleFramesTimer = 0;
             _idleSecondsFrom = 1;
@@ -51,7 +53,7 @@ namespace MazeGame.Core.GameObjects
 
         public override Projectile? GetAttack()
         {
-            if (AttackTimer == 0)
+            if (_attackTimer == 0)
             {
                 if (_attackDirection == Direction.Right || _attackDirection == Direction.Left)
                 {

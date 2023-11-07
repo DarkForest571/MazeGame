@@ -7,6 +7,7 @@ namespace MazeGame.Core.GameObjects
     {
         private readonly Projectile _attackProjectile;
         private Direction _attackDirection;
+        private int _attackTimer;
 
         private int _idleFramesTimer;
         private int _idleSecondsFrom;
@@ -27,6 +28,7 @@ namespace MazeGame.Core.GameObjects
         {
             _attackProjectile = attackProjectile;
             _attackDirection = Direction.Right;
+            _attackTimer = 0;
 
             _idleFramesTimer = 0;
             _idleSecondsFrom = 1;
@@ -41,7 +43,7 @@ namespace MazeGame.Core.GameObjects
 
         public override Projectile? GetAttack()
         {
-            if (AttackTimer == 0)
+            if (_attackTimer == 0)
             {
                 _attackProjectile.Position = Position + _attackDirection;
                 return _attackProjectile.Clone();

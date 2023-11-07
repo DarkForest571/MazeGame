@@ -6,6 +6,7 @@ namespace MazeGame.Core.GameObjects
     {
         private readonly Projectile _attackProjectile;
         private Direction _attackDirection;
+        private int _attackTimer;
 
         public Player(char playerImage,
                       Projectile attackProjectile,
@@ -18,13 +19,14 @@ namespace MazeGame.Core.GameObjects
         {
             _attackProjectile = attackProjectile;
             _attackDirection = Direction.Right;
+            _attackTimer = 0;
         }
 
         public override Player Clone() => new Player(Image, _attackProjectile, Position, Health, MoveSpeed);
 
         public override Projectile? GetAttack()
         {
-            if (AttackTimer == 0)
+            if (_attackTimer == 0)
             {
                 _attackProjectile.Position = Position + _attackDirection;
                 return _attackProjectile.Clone();

@@ -59,7 +59,7 @@ namespace MazeGame.Core
 
         public List<Direction> GetNeighborsByCondition(Vector2 position, Func<Tile, bool> condition)
         {
-            List<Direction> result = new List<Direction>();
+            List<Direction> result = new List<Direction>(4);
 
             if (condition(this[position + Vector2.Up]))
                 result.Add(Direction.Up);
