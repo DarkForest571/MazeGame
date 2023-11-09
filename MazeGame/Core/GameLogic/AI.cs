@@ -1,10 +1,12 @@
 ﻿using MazeGame.Core.GameObjects;
+using MazeGame.Utils;
 
 namespace MazeGame.Core.GameLogic
 {
     enum AIState
     {
         Idle,
+        Wander,
         Follow,
         Flee,
         Attack
@@ -12,9 +14,17 @@ namespace MazeGame.Core.GameLogic
 
     interface IAIControlable
     {
-        public void UpdateAI(World world, Player player, int framesPerSecond);
+        public int IdleTimer { get; }
 
-        public bool CanSeeEntity(World world, Entity entity);
+        public void TickIdleTimer();
+
+        public void SetNewIdleFrames(int framesPerSecond);
+
+        public AIState AIState { get; set; }
+
+        public Vector2 TargetPosition { get; set; }
+
+        public void UpdateAI(World world, Player player, int framesPerSecond);
 
         public void AIAction(World world, Player player, int framesPerSecond);
     }

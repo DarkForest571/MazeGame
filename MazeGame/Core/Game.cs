@@ -14,6 +14,7 @@ namespace MazeGame.Core
 
         private ISpawner _playerSpawner;
         private List<ISpawner> _enemySpawners;
+        private AIController _AIcontroller;
 
         private Vector2 _finalHatchPosition;
         private Tile _finalHatch;
@@ -50,6 +51,7 @@ namespace MazeGame.Core
                 new WorldwiseSpawner(_world, new Zombie('Z', meleeAttack), 15),
                 new WorldwiseSpawner(_world, new Shooter('S', horizontalRangeAttack, verticalRangeAttack), 10)
             };
+            _AIcontroller = new AIController(_world);
 
             // Input and UI
             _inputHandler = new DefaultInputHandler();
@@ -74,6 +76,7 @@ namespace MazeGame.Core
 
             _world.ClearAllEntities();
             _currentPlayer = (Player)_playerSpawner.SpawnOne();
+            _AIcontroller.Player = _currentPlayer;
             foreach (ISpawner spawner in _enemySpawners)
                 spawner.SpawnAll();
         }
@@ -128,7 +131,7 @@ namespace MazeGame.Core
 
         private void UpdateScene()
         {
-            UpdateAI(_framesPerSecond);
+            _AIcontroller.UpdateAllAI(_framesPerSecond);
             UpdateEntities(_framesPerSecond);
         }
 
@@ -147,15 +150,6 @@ namespace MazeGame.Core
         private bool CheckWinCondition()
         {
             return _currentPlayer.Position == _finalHatchPosition;
-        }
-
-        private void UpdateAI(int framesPerSecond)
-        {
-            foreach (Entity entity in _world.Entities)
-            {
-                if (entity is IAIControlable)
-                    ((IAIControlable)entity).UpdateAI(_world, _currentPlayer, framesPerSecond);
-            }
         }
 
         private void UpdateEntities(int framesPerSecond)

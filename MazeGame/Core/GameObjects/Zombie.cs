@@ -39,7 +39,24 @@ namespace MazeGame.Core.GameObjects
             _targetPosition = position;
         }
 
+        public int IdleTimer => _idleFramesTimer;
+
+        public AIState AIState { get => _AIstate; set => _AIstate = value; }
+
+        public Vector2 TargetPosition { get => _targetPosition; set => _targetPosition = value; }
+
         public override Zombie Clone() => new Zombie(Image, _attackProjectile, Position, Health, MoveSpeed);
+
+        public void TickIdleTimer()
+        {
+            if (_idleFramesTimer > 0)
+                _idleFramesTimer--;
+        }
+
+        public void SetNewIdleFrames(int framesPerSecond)
+        {
+            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
+        }
 
         public override Projectile? GetAttack()
         {
@@ -52,17 +69,12 @@ namespace MazeGame.Core.GameObjects
                 return null;
         }
 
-        private void SetNewIdleFrames(int framesPerSecond)
-        {
-            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
-        }
-
         public void UpdateAI(World world, Player player, int framesPerSecond)
         {
             switch (_AIstate)
             {
                 case AIState.Idle:
-                    if (CanSeeEntity(world, player))
+                    if (false)
                     {
                         _AIstate = AIState.Follow;
                         _targetPosition = player.Position;
@@ -114,41 +126,6 @@ namespace MazeGame.Core.GameObjects
                 case AIState.Attack:
                     break;
             }
-        }
-
-        public bool CanSeeEntity(World world, Entity entity)
-        {
-            Vector2 from, to;
-            Direction deltaStep;
-            if (entity.Position.X == Position.X)
-            {
-                (from, to) = 
-                    entity.Position.Y <= Position.Y
-                    ? (entity.Position, Position)
-                    : (Position, entity.Position);
-                deltaStep = Direction.Down;
-            }
-            else if (entity.Position.Y == Position.Y)
-            {
-                (from, to) =
-                    entity.Position.X <= Position.X
-                    ? (entity.Position, Position)
-                    : (Position, entity.Position);
-                deltaStep = Direction.Right;
-            }
-            else
-                return false;
-
-            bool visible = true;
-            for (; from != to; from += deltaStep)
-            {
-                if (!world[from].IsPassable)
-                {
-                    visible = false;
-                    break;
-                }
-            }
-            return visible;
         }
     }
 }
