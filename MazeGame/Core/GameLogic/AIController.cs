@@ -26,20 +26,58 @@ namespace MazeGame.Core.GameLogic
                     switch (AIEntity.AIState)
                     {
                         case AIState.Idle:
+                            AIEntity.TickIdleTimer();
                             if (EntityVisibility(_world, entity, _player, 10)) // TODO 10 is view distance. Put it in AIControlable
                             {
-                                AIEntity.AIState = AIState.Follow;
-                                continue;
+                                AIEntity.AIState = AIState.GettingAttackPosition;
+                                AIEntity.TargetPosition = _player.Position;
                             }
-                            AIEntity.TickIdleTimer();
-                            if (AIEntity.IdleTimer == 0)
+                            else if (AIEntity.IdleTimer == 0)
                             {
                                 AIEntity.SetNewIdleFrames(framesPerSecond);
                                 AIEntity.AIState = AIState.Wander;
                             }
                             break;
+                        case AIState.Wander:
+                            if (EntityVisibility(_world, entity, _player, 10))
+                            {
+                                AIEntity.AIState = AIState.GettingAttackPosition;
+                                AIEntity.TargetPosition = _player.Position;
+                            }
+                            else if (AIEntity.TargetPosition == entity.Position)
+                            {
+                                AIEntity.AIState = AIState.Idle;
+                            }
+                            break;
+                        case AIState.GettingAttackPosition: // Work in progress
+                            if (!EntityVisibility(_world, entity, _player, 10))
+                            {
+                                AIEntity.AIState = AIState.Follow;
+                            }
+                            else if (AIEntity.IsOnAttackPosition())
+                            {
+                                AIEntity.AIState = AIState.Attack;
+                            }
+                            break;
+                        case AIState.Attack:
+                            if (!EntityVisibility(_world, entity, _player, 10))
+                            {
+                                AIEntity.AIState = AIState.Follow;
+                            }
+                            break;
                         case AIState.Follow:
-
+                            if (entity.Position == AIEntity.TargetPosition)
+                            {
+                                if (EntityVisibility(_world, entity, _player, 10))
+                                {
+                                    AIEntity.AIState = AIState.GettingAttackPosition;
+                                    AIEntity.TargetPosition = _player.Position;
+                                }
+                                else
+                                {
+                                    AIEntity.AIState = AIState.Idle;
+                                }
+                            }
                             break;
                     }
                 }

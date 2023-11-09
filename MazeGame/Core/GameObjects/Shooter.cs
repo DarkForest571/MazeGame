@@ -18,7 +18,8 @@ namespace MazeGame.Core.GameObjects
 
         private AIState _AIstate;
 
-        private Vector2 _targetPosition;
+        private Vector2 _playerPosition;
+        private Vector2 _attackPosition;
 
         public Shooter(char image,
                       Projectile horizontalAttackProjectile,
@@ -41,14 +42,14 @@ namespace MazeGame.Core.GameObjects
 
             _AIstate = AIState.Idle;
 
-            _targetPosition = position;
+            _playerPosition = position;
         }
 
         public int IdleTimer => _idleFramesTimer;
 
         public AIState AIState { get => _AIstate; set => _AIstate = value; }
 
-        public Vector2 TargetPosition { get => _targetPosition; set => _targetPosition = value; }
+        public Vector2 TargetPosition { get => _playerPosition; set => _playerPosition = value; }
 
         public override Shooter Clone() => new Shooter(Image,
                                                        _horizontalAttackProjectile,
@@ -67,6 +68,22 @@ namespace MazeGame.Core.GameObjects
         {
             _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
         }
+
+        public void SetWanderingPosition(World world)
+        {
+            List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable);
+            if (list.Count > 0)
+            {
+                int choise = Random.Shared.Next(list.Count);
+                _playerPosition = Position + list[choise];
+            }
+            else
+            {
+                _playerPosition = Position;
+            }
+        }
+
+        public bool IsOnAttackPosition() => Position == _attackPosition;
 
         public override Projectile? GetAttack()
         {
@@ -87,48 +104,6 @@ namespace MazeGame.Core.GameObjects
                 return null;
         }
 
-        public void UpdateAI(World world, Player player, int framesPerSecond)
-        {
-            switch (_AIstate)
-            {
-                case AIState.Idle:
-                    if (false)
-                    {
-                        _AIstate = AIState.Follow;
-                        _targetPosition = player.Position;
-                    }
-                    else
-                    {
-                        _idleFramesTimer--;
-                        if (_idleFramesTimer > 0)
-                            return;
-                        SetNewIdleFrames(framesPerSecond);
-
-                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable);
-                        if (list.Count > 0)
-                        {
-                            int choise = Random.Shared.Next(list.Count);
-                            _targetPosition = Position + list[choise];
-                        }
-                    }
-                    break;
-                case AIState.Follow:
-                    if (_targetPosition == player.Position &&
-                        Vector2.SqDistance(Position, _targetPosition) <= 9)
-                    {
-                        _AIstate = AIState.Attack;
-                    }
-                    else if (Position == _targetPosition)
-                    {
-                        _AIstate = AIState.Idle;
-                    }
-                    break;
-                case AIState.Attack:
-                    break;
-            }
-
-        }
-
         public void AIAction(World world, Player player, int framesPerSecond)
         {
             switch (_AIstate)
@@ -137,7 +112,7 @@ namespace MazeGame.Core.GameObjects
                 case AIState.Follow:
                     if (MoveTimer == 0)
                     {
-                        Direction moveDirection = Vector2.GetDirection(Position, _targetPosition);
+                        Direction moveDirection = Vector2.GetDirection(Position, _playerPosition);
                         MoveTo(moveDirection, world[Position + moveDirection].MoveCost);
                     }
                     break;

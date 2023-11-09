@@ -7,8 +7,8 @@ namespace MazeGame.Core.GameLogic
     {
         Idle,
         Wander,
+        GettingAttackPosition,
         Follow,
-        Flee,
         Attack
     }
 
@@ -24,7 +24,9 @@ namespace MazeGame.Core.GameLogic
 
         public Vector2 TargetPosition { get; set; }
 
-        public void UpdateAI(World world, Player player, int framesPerSecond);
+        public bool IsOnAttackPosition();
+
+        public void SetWanderingPosition(World world);
 
         public void AIAction(World world, Player player, int framesPerSecond);
     }
