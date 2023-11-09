@@ -7,16 +7,8 @@ namespace MazeGame.Core.GameObjects
     {
         private readonly Projectile _attackProjectile;
         private Direction _attackDirection;
-        private int _attackTimer;
 
-        private int _idleFramesTimer;
-        private int _idleSecondsFrom;
-        private int _idleSecondsTo;
-
-        private AIState _AIstate;
-
-        private Vector2 _playerPosition;
-        private Vector2 _attackPosition;
+        private AIState _AIState;
 
         public Zombie(char zombieImage,
                       Projectile attackProjectile,
@@ -29,74 +21,35 @@ namespace MazeGame.Core.GameObjects
         {
             _attackProjectile = attackProjectile;
             _attackDirection = Direction.Right;
-            _attackTimer = 0;
 
-            _idleFramesTimer = 0;
-            _idleSecondsFrom = 1;
-            _idleSecondsTo = 3;
+            ZombieIdleState idleState = new ZombieIdleState(1, 3);
+            ZombieWanderingState wanderingState = new ZombieWanderingState();
+            ZombieAttackPreporationState attackPreporationState = new ZombieAttackPreporationState();
+            ZombieAttackState attackState = new ZombieAttackState(1);
+            ZombieFollowState followState = new ZombieFollowState();
 
-            _AIstate = AIState.Idle;
+            idleState.SetNextStates(wanderingState, attackPreporationState);
+            wanderingState.SetNextStates(idleState, attackPreporationState);
+            attackPreporationState.SetNextStates(followState, attackState);
+            attackState.SetNextStates(attackPreporationState, followState);
+            followState.SetNextStates(attackPreporationState, idleState);
 
-            _playerPosition = position;
+            _AIState = idleState;
         }
-
-        public int IdleTimer => _idleFramesTimer;
-
-        public AIState AIState { get => _AIstate; set => _AIstate = value; }
-
-        public Vector2 TargetPosition { get => _playerPosition; set => _playerPosition = value; }
 
         public override Zombie Clone() => new Zombie(Image, _attackProjectile, Position, Health, MoveSpeed);
 
-        public void TickIdleTimer()
+        public void HandleAIState(World world, Vector2 playerPosition, bool canSeePlayer, int framesPerSecond)
         {
-            if (_idleFramesTimer > 0)
-                _idleFramesTimer--;
+            AIState newState = _AIState.HandleAIState(world, Position, playerPosition, canSeePlayer, framesPerSecond);
+            if (newState != null)
+                _AIState = newState;
         }
-
-        public void SetNewIdleFrames(int framesPerSecond)
-        {
-            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
-        }
-
-        public void SetWanderingPosition(World world)
-        {
-            List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable);
-            if (list.Count > 0)
-            {
-                int choise = Random.Shared.Next(list.Count);
-                _playerPosition = Position + list[choise];
-            }
-        }
-
-        public bool IsOnAttackPosition() => Position == _attackPosition;
 
         public override Projectile? GetAttack()
         {
-            if (_attackTimer == 0)
-            {
-                _attackProjectile.Position = Position + _attackDirection;
-                return _attackProjectile.Clone();
-            }
-            else
-                return null;
-        }
-
-        public void AIAction(World world, Player player, int framesPerSecond)
-        {
-            switch (_AIstate)
-            {
-                case AIState.Idle:
-                case AIState.Follow:
-                    if (MoveTimer == 0)
-                    {
-                        Direction moveDirection = Vector2.GetDirection(Position, _playerPosition);
-                        MoveTo(moveDirection, world[Position + moveDirection].MoveCost);
-                    }
-                    break;
-                case AIState.Attack:
-                    break;
-            }
+            _attackProjectile.Position = Position + _attackDirection;
+            return _attackProjectile.Clone();
         }
     }
 }

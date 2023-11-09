@@ -158,9 +158,6 @@ namespace MazeGame.Core
             {
                 entity.UpdateMoveTimer();
 
-                if (entity is IAIControlable)
-                    ((IAIControlable)entity).AIAction(_world, _currentPlayer, framesPerSecond);
-
                 if (entity is Player)
                 {
                     foreach (PlayerCommand command in _inputHandler.Commands)
