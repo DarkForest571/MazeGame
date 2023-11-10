@@ -42,17 +42,17 @@ namespace MazeGame.Core
             _generator = new DefaultGenerator(_world, wall, space);
 
             // Entities, projectiles, entities and spawners
-            Projectile meleeAttack = new Projectile('/', 1, 0.2f, 0);
-            Projectile horizontalRangeAttack = new Projectile('-', 10, 0.2f, 0);
-            Projectile verticalRangeAttack = new Projectile('|', 10, 0.2f, 0);
-            Player player = new Player('☻', meleeAttack);
-            Zombie zombie = new Zombie('Z', meleeAttack, 150, 2f, 10);
-            Shooter shooter = new Shooter('S', horizontalRangeAttack, verticalRangeAttack);
+            Projectile meleeAttack = new Projectile('/', 1, 0.2f, 15);
+            Projectile horizontalRangeAttack = new Projectile('-', 10, 0.2f, 10);
+            Projectile verticalRangeAttack = new Projectile('|', 10, 0.2f, 10);
+            Player player = new Player('☻', meleeAttack, 100, 1f, 1f);
+            Zombie zombie = new Zombie('Z', meleeAttack, 150, 1f, 10);
+            Shooter shooter = new Shooter('S', horizontalRangeAttack, verticalRangeAttack, 75, 2f, 10);
 
             _playerSpawner = new WorldwiseSpawner(_world, player, 1);
             _enemySpawners = new List<ISpawner>
             {
-                new WorldwiseSpawner(_world, zombie, 1),
+                new WorldwiseSpawner(_world, zombie, 15),
                 new WorldwiseSpawner(_world, shooter, 10)
             };
             _AIcontroller = new AIController(_world);
@@ -95,6 +95,8 @@ namespace MazeGame.Core
             long frame = 0;
             long lag = -1;
 
+            int level = 1;
+
             Stopwatch stopwatch = Stopwatch.StartNew();
             while (!_inputHandler.ExitCommand)
             {
@@ -109,6 +111,9 @@ namespace MazeGame.Core
                     // Game logic
                     UpdateScene();
 
+                    // HUD
+                    _UIRenderer.SetUIData($"Health: {_currentPlayer.Health}\nLevel: {level}\n");
+
                     // Logs
                     float FPS = deltaMicroseconds / (float)lag * _framesPerSecond;
                     int barLength = (int)(frame % _framesPerSecond * 20 / _framesPerSecond);
@@ -118,13 +123,21 @@ namespace MazeGame.Core
                     else
                         bar[barLength - 1] = '|';
 
-                    _UIRenderer.SetUIData($"{FPS,6:F3} FPS\n{(lag / 10),6:D} mics/frame\n" + new string(bar));
+                    _UIRenderer.AddUIData($"{FPS,6:F3} FPS\n{(lag / 10),6:D} mics/frame\n" + new string(bar));
 
                     // Render
                     RenderScene();
 
-                    if(CheckWinCondition())
+                    // Win and Game Over check
+                    if (CheckWinCondition())
+                    {
                         RestartLevel();
+                        level++;
+                    }
+                    if (CheckGameOverCondition())
+                    {
+                        level = 1;
+                    }
 
                     ++frame;
                 }
@@ -138,7 +151,7 @@ namespace MazeGame.Core
             _AIcontroller.UpdateAllAI(_framesPerSecond);
             _AIcontroller.ActionAllAI(_framesPerSecond);
             _world.UpdateProjectiles(_framesPerSecond);
-            UpdateEntities(_framesPerSecond);
+            _currentPlayer.Update(_world, _inputHandler, _framesPerSecond);
 
             _world.ClearDeadEntities();
             _world.ClearDeadProjectile();
@@ -156,49 +169,10 @@ namespace MazeGame.Core
             _UIRenderer.Render();
         }
 
-        private bool CheckWinCondition()
-        {
-            return _currentPlayer.Position == _finalHatchPosition;
-        }
+        private bool CheckWinCondition() =>
+            _currentPlayer.Position == _finalHatchPosition;
 
-        private void UpdateEntities(int framesPerSecond)
-        {
-            foreach (Entity entity in _world.Entities)
-            {
-                entity.UpdateMoveTimer();
-
-                if (entity is Player)
-                {
-                    foreach (PlayerCommand command in _inputHandler.Commands)
-                    {
-                        switch (command)
-                        {
-                            case PlayerCommand.GoUp:
-                            case PlayerCommand.GoRight:
-                            case PlayerCommand.GoDown:
-                            case PlayerCommand.GoLeft:
-                                Direction directionToMove = command switch
-                                {
-                                    PlayerCommand.GoUp => Direction.Up,
-                                    PlayerCommand.GoRight => Direction.Right,
-                                    PlayerCommand.GoDown => Direction.Down,
-                                    PlayerCommand.GoLeft => Direction.Left
-                                };
-                                List<Direction> availableDirections =
-                                    _world.GetNeighborsByCondition(_currentPlayer.Position, (tile) => tile.IsPassable);
-                                if (availableDirections.Contains(directionToMove))
-                                {
-                                    _currentPlayer.MoveTo(directionToMove,
-                                        _world[_currentPlayer.Position + directionToMove].MoveCost);
-                                }
-                                break;
-                            case PlayerCommand.Attack:
-                                break;
-                        }
-                    }
-                    _inputHandler.ClearCommands();
-                }
-            }
-        }
+        private bool CheckGameOverCondition() =>
+            _currentPlayer.Health <= 0;
     }
 }
