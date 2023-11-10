@@ -66,6 +66,9 @@ namespace MazeGame.Graphics
 
             foreach (Entity entity in _world.Entities)
                 _frameBuffer[entity.Position.Y * Size.X + entity.Position.X] = entity.Image;
+
+            foreach (Projectile projectile in _world.Projectiles)
+                _frameBuffer[projectile.Position.Y * Size.X + projectile.Position.X] = projectile.Image;
         }
     }
 

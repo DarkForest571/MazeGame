@@ -1,5 +1,4 @@
 ﻿using MazeGame.Utils;
-using System.Runtime.InteropServices;
 
 namespace MazeGame.Core.GameObjects
 {
@@ -12,9 +11,9 @@ namespace MazeGame.Core.GameObjects
         private int _health;
 
         public Entity(char entityImage,
-                      Vector2 position,
                       int health,
-                      float moveSpeed) : base(entityImage)
+                      float moveSpeed,
+                      Vector2 position) : base(entityImage)
         {
             _position = position;
             _moveSpeed = Math.Max(moveSpeed, 0.1f);
@@ -33,13 +32,11 @@ namespace MazeGame.Core.GameObjects
 
         public abstract override Entity Clone();
 
-        public abstract Projectile? GetAttack();
-
-        public virtual void MoveTo(Direction direction, int moveCost)
+        public virtual void MoveTo(Direction direction, float moveCost, int framesPerSecond)
         {
             if (_moveTimer == 0)
             {
-                _moveTimer = (int)(Math.Max(moveCost, 1) / _moveSpeed);
+                _moveTimer = (int)(moveCost * framesPerSecond / _moveSpeed);
                 _position += direction;
             }
         }

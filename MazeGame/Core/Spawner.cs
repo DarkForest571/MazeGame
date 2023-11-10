@@ -1,6 +1,6 @@
 ﻿using MazeGame.Core.GameObjects;
 
-namespace MazeGame.Core.GameLogic
+namespace MazeGame.Core
 {
     interface ISpawner
     {

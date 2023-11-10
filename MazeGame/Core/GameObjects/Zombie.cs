@@ -1,154 +1,89 @@
-﻿using MazeGame.Core.GameLogic;
+﻿using MazeGame.Core.AI;
+using MazeGame.Core.GameLogic;
 using MazeGame.Utils;
 
 namespace MazeGame.Core.GameObjects
 {
     sealed class Zombie : Entity, IAIControlable
     {
-        private readonly Projectile _attackProjectile;
-        private Direction _attackDirection;
-        private int _attackTimer;
+        private DefaultIdleState _idleState;
+        private DefaultWanderingState _wanderingState;
+        private ZombieAttackPreporationState _attackPreporationState;
+        private DefaultAttackState _attackState;
+        private DefaultFollowState _followState;
 
-        private int _idleFramesTimer;
-        private int _idleSecondsFrom;
-        private int _idleSecondsTo;
+        private AIState _AIState;
 
-        private AIState _AIstate;
-
-        private Vector2 _targetPosition;
+        private Projectile _attackProjectile;
+        private readonly int _viewDistanse;
 
         public Zombie(char zombieImage,
                       Projectile attackProjectile,
-                      Vector2 position = default,
                       int health = 150,
-                      float moveSpeed = 0.25f) : base(zombieImage,
-                                                      position,
-                                                      health,
-                                                      moveSpeed)
+                      float moveSpeed = 0.25f,
+                      int viewDistance = 10,
+                      Vector2 position = default) : base(zombieImage,
+                                                         health,
+                                                         moveSpeed,
+                                                         position)
         {
+            _idleState = new DefaultIdleState(1, 3);
+            _wanderingState = new DefaultWanderingState();
+            _attackPreporationState = new ZombieAttackPreporationState();
+            _attackState = new DefaultAttackState(1);
+            _followState = new DefaultFollowState();
+
+            _idleState.SetNextStates(_wanderingState, _attackPreporationState);
+            _wanderingState.SetNextStates(_idleState, _attackPreporationState);
+            _attackPreporationState.SetNextStates(_followState, _attackState);
+            _attackState.SetNextStates(_attackPreporationState, _followState);
+            _followState.SetNextStates(_attackPreporationState, _idleState);
+
+            _AIState = _idleState;
+
             _attackProjectile = attackProjectile;
-            _attackDirection = Direction.Right;
-            _attackTimer = 0;
-
-            _idleFramesTimer = 0;
-            _idleSecondsFrom = 1;
-            _idleSecondsTo = 3;
-
-            _AIstate = AIState.Idle;
-
-            _targetPosition = position;
+            _viewDistanse = viewDistance;
         }
 
-        public override Zombie Clone() => new Zombie(Image, _attackProjectile, Position, Health, MoveSpeed);
+        public int ViewDistance => _viewDistanse;
 
-        public override Projectile? GetAttack()
+        public override Zombie Clone() => new Zombie(Image, _attackProjectile, Health, MoveSpeed, _viewDistanse, Position);
+
+        public void HandleAIState(World world, Vector2 playerPosition, bool canSeePlayer, int framesPerSecond)
         {
-            if (_attackTimer == 0)
-            {
-                _attackProjectile.Position = Position + _attackDirection;
-                return _attackProjectile.Clone();
-            }
-            else
-                return null;
+            AIState newState = _AIState.HandleAIState(world, Position, playerPosition, canSeePlayer, framesPerSecond);
+            if (newState != null)
+                _AIState = newState;
         }
 
-        private void SetNewIdleFrames(int framesPerSecond)
+        public Projectile GetAttack()
         {
-            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
+            return _attackProjectile.Clone();
         }
 
-        public void UpdateAI(World world, Player player, int framesPerSecond)
+        public void AIAction(World world, int framesPerSecond)
         {
-            switch (_AIstate)
+            _AIState.Update();
+            Direction direction;
+            switch (_AIState)
             {
-                case AIState.Idle:
-                    if (CanSeeEntity(world, player))
+                case IdleState:
+                    break;
+                case MoveAIState state:
+                    UpdateMoveTimer();
+                    direction = Vector2.GetDirection(Position, state.TargetPosition);
+                    MoveTo(direction, world[Position + direction].MoveCost, framesPerSecond);
+                    break;
+                case AttackState state:
+                    if (state.ReadyForAttck)
                     {
-                        _AIstate = AIState.Follow;
-                        _targetPosition = player.Position;
-                    }
-                    else
-                    {
-                        _idleFramesTimer--;
-                        if (_idleFramesTimer > 0)
-                            return;
-                        SetNewIdleFrames(framesPerSecond);
-
-                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable);
-                        if (list.Count > 0)
-                        {
-                            int choise = Random.Shared.Next(list.Count);
-                            _targetPosition = Position + list[choise];
-                        }
+                        Projectile projectile = GetAttack();
+                        projectile.Position = Position + state.AttackDirection;
+                        projectile.Init(this, state.AttackDirection, framesPerSecond);
+                        world.AddProjectile(projectile);
                     }
                     break;
-                case AIState.Follow:
-                    if (_targetPosition == player.Position &&
-                        Vector2.SqDistance(Position, _targetPosition) == 1)
-                    {
-                        _AIstate = AIState.Attack;
-                    }
-                    else if (Position == _targetPosition)
-                    {
-                        _AIstate = AIState.Idle;
-                    }
-                    break;
-                case AIState.Attack:
-                    break;
             }
-
-        }
-
-        public void AIAction(World world, Player player, int framesPerSecond)
-        {
-            switch (_AIstate)
-            {
-                case AIState.Idle:
-                case AIState.Follow:
-                    if (MoveTimer == 0)
-                    {
-                        Direction moveDirection = Vector2.GetDirection(Position, _targetPosition);
-                        MoveTo(moveDirection, world[Position + moveDirection].MoveCost);
-                    }
-                    break;
-                case AIState.Attack:
-                    break;
-            }
-        }
-
-        public bool CanSeeEntity(World world, Entity entity)
-        {
-            Vector2 from, to;
-            Direction deltaStep;
-            if (entity.Position.X == Position.X)
-            {
-                (from, to) = 
-                    entity.Position.Y <= Position.Y
-                    ? (entity.Position, Position)
-                    : (Position, entity.Position);
-                deltaStep = Direction.Down;
-            }
-            else if (entity.Position.Y == Position.Y)
-            {
-                (from, to) =
-                    entity.Position.X <= Position.X
-                    ? (entity.Position, Position)
-                    : (Position, entity.Position);
-                deltaStep = Direction.Right;
-            }
-            else
-                return false;
-
-            bool visible = true;
-            for (; from != to; from += deltaStep)
-            {
-                if (!world[from].IsPassable)
-                {
-                    visible = false;
-                    break;
-                }
-            }
-            return visible;
         }
     }
 }

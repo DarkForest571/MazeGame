@@ -1,172 +1,106 @@
-﻿using MazeGame.Core.GameLogic;
+﻿using MazeGame.Core.AI;
+using MazeGame.Core.GameLogic;
 using MazeGame.Utils;
 
 namespace MazeGame.Core.GameObjects
 {
     sealed class Shooter : Entity, IAIControlable
     {
+        private DefaultIdleState _idleState;
+        private DefaultWanderingState _wanderingState;
+        private ShooterAttackPreporationState _attackPreporationState;
+        private DefaultAttackState _attackState;
+        private DefaultFollowState _followState;
+
+        private AIState _AIState;
+
         Projectile _horizontalAttackProjectile;
         Projectile _verticalAttackProjectile;
-        private Direction _attackDirection;
-        private int _attackTimer;
-
-        private int _shootDistance;
-
-        private int _idleFramesTimer;
-        private int _idleSecondsFrom;
-        private int _idleSecondsTo;
-
-        private AIState _AIstate;
-
-        private Vector2 _targetPosition;
+        private readonly int _viewDistanse;
 
         public Shooter(char image,
                       Projectile horizontalAttackProjectile,
                       Projectile verticalAttackProjectile,
-                      Vector2 position = default,
                       int health = 75,
-                      float moveSpeed = 1.25f) : base(image,
-                                                      position,
-                                                      health,
-                                                      moveSpeed)
+                      float moveSpeed = 1.5f,
+                      int viewDistance = 10,
+                      Vector2 position = default) : base(image,
+                                                         health,
+                                                         moveSpeed,
+                                                         position)
         {
+            _idleState = new DefaultIdleState(1, 3);
+            _wanderingState = new DefaultWanderingState();
+            _attackPreporationState = new ShooterAttackPreporationState(3);
+            _attackState = new DefaultAttackState(1);
+            _followState = new DefaultFollowState();
+
+            _idleState.SetNextStates(_wanderingState, _attackPreporationState);
+            _wanderingState.SetNextStates(_idleState, _attackPreporationState);
+            _attackPreporationState.SetNextStates(_followState, _attackState);
+            _attackState.SetNextStates(_attackPreporationState, _followState);
+            _followState.SetNextStates(_attackPreporationState, _idleState);
+
+            _AIState = _idleState;
+
             _horizontalAttackProjectile = horizontalAttackProjectile;
             _verticalAttackProjectile = verticalAttackProjectile;
-            _attackDirection = Direction.Right;
-            _attackTimer = 0;
-
-            _idleFramesTimer = 0;
-            _idleSecondsFrom = 1;
-            _idleSecondsTo = 3;
-
-            _AIstate = AIState.Idle;
-
-            _targetPosition = position;
+            _viewDistanse = viewDistance;
         }
+
+        public int ViewDistance => _viewDistanse;
 
         public override Shooter Clone() => new Shooter(Image,
                                                        _horizontalAttackProjectile,
                                                        _verticalAttackProjectile,
-                                                       Position,
                                                        Health,
-                                                       MoveSpeed);
+                                                       MoveSpeed,
+                                                       _viewDistanse,
+                                                       Position);
 
-        public override Projectile? GetAttack()
+
+        public void HandleAIState(World world, Vector2 playerPosition, bool canSeePlayer, int framesPerSecond)
         {
-            if (_attackTimer == 0)
+            AIState newState = _AIState.HandleAIState(world, Position, playerPosition, canSeePlayer, framesPerSecond);
+            if (newState != null)
+                _AIState = newState;
+        }
+
+        public Projectile GetAttack(Direction direction)
+        {
+            if (direction == Direction.Right || direction == Direction.Left)
             {
-                if (_attackDirection == Direction.Right || _attackDirection == Direction.Left)
-                {
-                    _horizontalAttackProjectile.Position = Position + _attackDirection;
-                    return _horizontalAttackProjectile.Clone();
-                }
-                else
-                {
-                    _verticalAttackProjectile.Position = Position + _attackDirection;
-                    return _verticalAttackProjectile.Clone();
-                }
+                return _horizontalAttackProjectile.Clone();
             }
             else
-                return null;
-        }
-
-        private void SetNewIdleFrames(int framesPerSecond)
-        {
-            _idleFramesTimer = Random.Shared.Next(_idleSecondsFrom * framesPerSecond, _idleSecondsTo * framesPerSecond);
-        }
-
-        public void UpdateAI(World world, Player player, int framesPerSecond)
-        {
-            switch (_AIstate)
             {
-                case AIState.Idle:
-                    if (CanSeeEntity(world, player))
-                    {
-                        _AIstate = AIState.Follow;
-                        _targetPosition = player.Position;
-                    }
-                    else
-                    {
-                        _idleFramesTimer--;
-                        if (_idleFramesTimer > 0)
-                            return;
-                        SetNewIdleFrames(framesPerSecond);
-
-                        List<Direction> list = world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable);
-                        if (list.Count > 0)
-                        {
-                            int choise = Random.Shared.Next(list.Count);
-                            _targetPosition = Position + list[choise];
-                        }
-                    }
-                    break;
-                case AIState.Follow:
-                    if (_targetPosition == player.Position &&
-                        Vector2.SqDistance(Position, _targetPosition) <= 9)
-                    {
-                        _AIstate = AIState.Attack;
-                    }
-                    else if (Position == _targetPosition)
-                    {
-                        _AIstate = AIState.Idle;
-                    }
-                    break;
-                case AIState.Attack:
-                    break;
-            }
-
-        }
-
-        public void AIAction(World world, Player player, int framesPerSecond)
-        {
-            switch (_AIstate)
-            {
-                case AIState.Idle:
-                case AIState.Follow:
-                    if (MoveTimer == 0)
-                    {
-                        Direction moveDirection = Vector2.GetDirection(Position, _targetPosition);
-                        MoveTo(moveDirection, world[Position + moveDirection].MoveCost);
-                    }
-                    break;
-                case AIState.Attack:
-                    break;
+                return _verticalAttackProjectile.Clone();
             }
         }
 
-        public bool CanSeeEntity(World world, Entity entity)
+        public void AIAction(World world, int framesPerSecond)
         {
-            Vector2 from, to;
-            Direction deltaStep;
-            if (entity.Position.X == Position.X)
+            _AIState.Update();
+            Direction direction;
+            switch (_AIState)
             {
-                (from, to) =
-                    entity.Position.Y <= Position.Y
-                    ? (entity.Position, Position)
-                    : (Position, entity.Position);
-                deltaStep = Direction.Down;
-            }
-            else if (entity.Position.Y == Position.Y)
-            {
-                (from, to) =
-                    entity.Position.X <= Position.X
-                    ? (entity.Position, Position)
-                    : (Position, entity.Position);
-                deltaStep = Direction.Right;
-            }
-            else
-                return false;
-
-            bool visible = true;
-            for (; from != to; from += deltaStep)
-            {
-                if (!world[from].IsPassable)
-                {
-                    visible = false;
+                case IdleState:
                     break;
-                }
+                case MoveAIState state:
+                    UpdateMoveTimer();
+                    direction = Vector2.GetDirection(Position, state.TargetPosition);
+                    MoveTo(direction, world[Position + direction].MoveCost, framesPerSecond);
+                    break;
+                case AttackState state:
+                    if (state.ReadyForAttck)
+                    {
+                        Projectile projectile = GetAttack(state.AttackDirection);
+                        projectile.Position = Position + state.AttackDirection;
+                        projectile.Init(this, state.AttackDirection, framesPerSecond);
+                        world.AddProjectile(projectile);
+                    }
+                    break;
             }
-            return visible;
         }
     }
 }
