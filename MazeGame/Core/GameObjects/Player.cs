@@ -24,7 +24,7 @@ namespace MazeGame.Core.GameObjects
 
         public override Player Clone() => new Player(Image, _attackProjectile, Health, MoveSpeed, Position);
 
-        public override Projectile? GetAttack()
+        public Projectile GetAttack()
         {
             if (_attackTimer == 0)
             {

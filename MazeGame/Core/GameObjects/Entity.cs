@@ -32,8 +32,6 @@ namespace MazeGame.Core.GameObjects
 
         public abstract override Entity Clone();
 
-        public abstract Projectile? GetAttack();
-
         public virtual void MoveTo(Direction direction, int moveCost)
         {
             if (_moveTimer == 0)

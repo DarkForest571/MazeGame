@@ -1,4 +1,5 @@
-﻿using MazeGame.Core.GameLogic;
+﻿using MazeGame.Core.AI;
+using MazeGame.Core.GameLogic;
 using MazeGame.Utils;
 
 namespace MazeGame.Core.GameObjects
@@ -8,7 +9,7 @@ namespace MazeGame.Core.GameObjects
         private DefaultIdleState _idleState;
         private DefaultWanderingState _wanderingState;
         private ZombieAttackPreporationState _attackPreporationState;
-        private ZombieAttackState _attackState;
+        private DefaultAttackState _attackState;
         private DefaultFollowState _followState;
 
         private AIState _AIState;
@@ -29,7 +30,7 @@ namespace MazeGame.Core.GameObjects
             _idleState = new DefaultIdleState(1, 3);
             _wanderingState = new DefaultWanderingState();
             _attackPreporationState = new ZombieAttackPreporationState();
-            _attackState = new ZombieAttackState(1);
+            _attackState = new DefaultAttackState(1);
             _followState = new DefaultFollowState();
 
             _idleState.SetNextStates(_wanderingState, _attackPreporationState);
@@ -55,43 +56,32 @@ namespace MazeGame.Core.GameObjects
                 _AIState = newState;
         }
 
-        public override Projectile GetAttack()
+        public Projectile GetAttack()
         {
             return _attackProjectile.Clone();
         }
 
         public void AIAction(World world, int framesPerSecond)
         {
+            _AIState.Update();
             Direction direction;
             switch (_AIState)
             {
                 case IdleState:
-                    _AIState.Update();
                     break;
-                case WanderingState state:
+                case MoveAIState state:
                     UpdateMoveTimer();
                     direction = Vector2.GetDirection(Position, state.TargetPosition);
                     MoveTo(direction, framesPerSecond);
                     break;
-                case AttackPreporationState state:
-                    UpdateMoveTimer();
-                    direction = Vector2.GetDirection(Position, state.AttackPosition);
-                    MoveTo(direction, framesPerSecond);
-                    break;
                 case AttackState state:
-                    _AIState.Update();
                     if (state.ReadyForAttck)
                     {
                         Projectile projectile = GetAttack();
                         projectile.Position = Position + state.AttackDirection;
-                        projectile.Init(state.AttackDirection, framesPerSecond);
+                        projectile.Init(this, state.AttackDirection, framesPerSecond);
                         world.AddProjectile(projectile);
                     }
-                    break;
-                case FollowState state:
-                    UpdateMoveTimer();
-                    direction = Vector2.GetDirection(Position, state.LastPlayerPosition);
-                    MoveTo(direction, framesPerSecond);
                     break;
             }
         }

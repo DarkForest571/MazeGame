@@ -1,6 +1,7 @@
-﻿using MazeGame.Utils;
+﻿using MazeGame.Core.GameLogic;
+using MazeGame.Utils;
 
-namespace MazeGame.Core.GameLogic
+namespace MazeGame.Core.AI
 {
     class DefaultIdleState : IdleState
     {
@@ -66,7 +67,7 @@ namespace MazeGame.Core.GameLogic
                 return _nextPreporationState;
             }
 
-            if (entityPosition == _targetPosition)
+            if (entityPosition == _wanderingPosition)
             {
                 _nextIdleState.InitState(framesPerSecond);
                 return _nextIdleState;
@@ -75,52 +76,12 @@ namespace MazeGame.Core.GameLogic
         }
     }
 
-    class ZombieAttackPreporationState : AttackPreporationState
-    {
-        private FollowState _nextFollowState;
-        private AttackState _nextAttackState;
-
-        public ZombieAttackPreporationState() { }
-
-        public void SetNextStates(FollowState followState, AttackState attackState)
-        {
-            _nextFollowState = followState;
-            _nextAttackState = attackState;
-        }
-
-        public override AIState? HandleAIState(World world,
-                                               Vector2 entityPosition,
-                                               Vector2 playerPosition,
-                                               bool canSeePlayer,
-                                               int framesPerSecond)
-        {
-            if (!canSeePlayer)
-            {
-                _nextFollowState.InitState(_lastPlayerPosition);
-                return _nextFollowState;
-            }
-
-            if (playerPosition != _lastPlayerPosition)
-            {
-                InitState(world, entityPosition, playerPosition);
-                return this;
-            }
-
-            if (entityPosition == _attackPosition)
-            {
-                _nextAttackState.InitState(entityPosition, playerPosition, framesPerSecond);
-                return _nextAttackState;
-            }
-            return null;
-        }
-    }
-
-    class ZombieAttackState : AttackState
+    class DefaultAttackState : AttackState
     {
         private AttackPreporationState _nextPreporationState;
         private FollowState _nextFollowState;
 
-        public ZombieAttackState(float secondsRerAttack) : base(secondsRerAttack) { }
+        public DefaultAttackState(float secondsRerAttack) : base(secondsRerAttack) { }
 
         public void SetNextStates(AttackPreporationState attackPreporationState, FollowState followState)
         {
@@ -140,20 +101,18 @@ namespace MazeGame.Core.GameLogic
                 return _nextFollowState;
             }
 
-            if (playerPosition != _lastPlayerPosition)
+            if (_attackTimer == 0)
             {
-                _nextPreporationState.InitState(world, entityPosition, playerPosition);
-                return _nextPreporationState;
-            }
-
-            if(_attackTimer == 0)
-            {
+                if (playerPosition != _lastPlayerPosition)
+                {
+                    _nextPreporationState.InitState(world, entityPosition, playerPosition);
+                    return _nextPreporationState;
+                }
                 InitState(entityPosition, playerPosition, framesPerSecond);
                 return this;
             }
             return null;
         }
-
     }
 
     class DefaultFollowState : FollowState

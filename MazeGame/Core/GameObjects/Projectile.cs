@@ -6,38 +6,46 @@ namespace MazeGame.Core.GameObjects
     {
         private Vector2 _position;
         private Direction _direction;
-        private readonly float _moveSpeed;
+        private readonly float _secondsPerTile;
         private int _moveTimer;
 
         private int _lifeTime;
 
         private readonly int _damage;
+        private Entity _owner;
 
         public Projectile(char projectileImage,
                           int distance = 1,
-                          float moveSpeed = 1.0f,
+                          float secondsPerTile = 1.0f,
                           int damage = 0,
                           Vector2 position = default,
                           Direction direction = default) : base(projectileImage)
         {
             _position = position;
             _direction = direction;
-            _lifeTime = distance;
-            _moveSpeed = moveSpeed;
-            _damage = damage;
+            _secondsPerTile = secondsPerTile;
             _moveTimer = 0;
+
+            _lifeTime = distance;
+
+            _damage = damage;
         }
 
         public Vector2 Position { get => _position; set => _position = value; }
 
+        public int Damage => _damage;
+
+        public Entity Owner => _owner;
+
         public bool IsDead => _lifeTime == 0;
 
-        public override Projectile Clone() => new Projectile(Image, _lifeTime, _moveSpeed, _damage, _position, _direction);
+        public override Projectile Clone() => new Projectile(Image, _lifeTime, _secondsPerTile, _damage, _position, _direction);
 
-        public void Init(Direction direction, int framesPerSeconds)
+        public void Init(Entity owner, Direction direction, int framesPerSeconds)
         {
+            _owner = owner;
             _direction = direction;
-            _moveTimer = (int)(framesPerSeconds / _moveSpeed);
+            _moveTimer = (int)(framesPerSeconds * _secondsPerTile);
         }
 
         public void Update(int framesPerSecond)
@@ -45,7 +53,7 @@ namespace MazeGame.Core.GameObjects
             _moveTimer--;
             if (_moveTimer == 0)
             {
-                _moveTimer = (int)(framesPerSecond / _moveSpeed);
+                _moveTimer = (int)(framesPerSecond * _secondsPerTile);
                 _position += _direction;
                 _lifeTime--;
             }

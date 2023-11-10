@@ -14,6 +14,11 @@ namespace MazeGame.Core.GameLogic
         void Update();
     }
 
+    interface MoveAIState : AIState
+    {
+        Vector2 TargetPosition { get; }
+    }
+
     abstract class IdleState : AIState
     {
         protected int _idleFramesTimer;
@@ -47,13 +52,13 @@ namespace MazeGame.Core.GameLogic
         }
     }
 
-    abstract class WanderingState : AIState
+    abstract class WanderingState : MoveAIState
     {
-        protected Vector2 _targetPosition;
+        protected Vector2 _wanderingPosition;
 
         protected WanderingState() { }
 
-        public Vector2 TargetPosition => _targetPosition;
+        public Vector2 TargetPosition => _wanderingPosition;
 
         public abstract AIState? HandleAIState(World world,
                                                Vector2 entityPosition,
@@ -69,23 +74,23 @@ namespace MazeGame.Core.GameLogic
             if (availableDirection.Count > 0)
             {
                 int choice = Random.Shared.Next(availableDirection.Count);
-                _targetPosition = entityPosition + availableDirection[choice];
+                _wanderingPosition = entityPosition + availableDirection[choice];
             }
             else
             {
-                _targetPosition = entityPosition;
+                _wanderingPosition = entityPosition;
             }
         }
     }
 
-    abstract class AttackPreporationState : AIState
+    abstract class AttackPreporationState : MoveAIState
     {
         protected Vector2 _attackPosition;
         protected Vector2 _lastPlayerPosition;
 
         protected AttackPreporationState() { }
 
-        public Vector2 AttackPosition => _attackPosition;
+        public Vector2 TargetPosition => _attackPosition;
 
         public abstract AIState? HandleAIState(World world,
                                                Vector2 entityPosition,
@@ -140,13 +145,13 @@ namespace MazeGame.Core.GameLogic
         }
     }
 
-    abstract class FollowState : AIState
+    abstract class FollowState : MoveAIState
     {
         protected Vector2 _lastPlayerPosition;
 
         protected FollowState() { }
 
-        public Vector2 LastPlayerPosition => _lastPlayerPosition;
+        public Vector2 TargetPosition => _lastPlayerPosition;
 
         public abstract AIState? HandleAIState(World world,
                                                Vector2 entityPosition,
