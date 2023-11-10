@@ -5,15 +5,15 @@ namespace MazeGame.Core.GameObjects
     class Tile : GameObject
     {
         private readonly bool _isPassable;
-        private readonly int _moveCost;
+        private readonly float _moveCost;
 
-        public Tile(char image, bool isPassable, int moveCost = 1) : base(image)
+        public Tile(char image, bool isPassable, float moveCost = 1f) : base(image)
         {
             _isPassable = isPassable;
-            _moveCost = Math.Max(moveCost, 1);
+            _moveCost = Math.Max(moveCost, 0.001f);
         }
 
-        public int MoveCost => _moveCost;
+        public float MoveCost => _moveCost;
 
         public bool IsPassable => _isPassable;
 

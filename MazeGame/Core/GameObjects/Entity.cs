@@ -32,11 +32,11 @@ namespace MazeGame.Core.GameObjects
 
         public abstract override Entity Clone();
 
-        public virtual void MoveTo(Direction direction, int moveCost)
+        public virtual void MoveTo(Direction direction, float moveCost, int framesPerSecond)
         {
             if (_moveTimer == 0)
             {
-                _moveTimer = (int)(Math.Max(moveCost, 1) / _moveSpeed);
+                _moveTimer = (int)(moveCost * framesPerSecond / _moveSpeed);
                 _position += direction;
             }
         }

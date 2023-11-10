@@ -72,7 +72,7 @@ namespace MazeGame.Core.GameObjects
                 case MoveAIState state:
                     UpdateMoveTimer();
                     direction = Vector2.GetDirection(Position, state.TargetPosition);
-                    MoveTo(direction, framesPerSecond);
+                    MoveTo(direction, world[Position + direction].MoveCost, framesPerSecond);
                     break;
                 case AttackState state:
                     if (state.ReadyForAttck)

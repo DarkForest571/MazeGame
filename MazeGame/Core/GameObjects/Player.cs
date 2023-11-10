@@ -7,7 +7,7 @@ namespace MazeGame.Core.GameObjects
         private readonly Projectile _attackProjectile;
         private Direction _attackDirection;
         private int _attackTimer;
-        protected float _secondsPerAttack;
+        private float _secondsPerAttack;
 
         public Player(char playerImage,
                       Projectile attackProjectile,
@@ -35,6 +35,7 @@ namespace MazeGame.Core.GameObjects
         public void Update(World world, IInputHandler inputHandler, int framesPerSecond)
         {
             UpdateAttackTimer();
+            UpdateMoveTimer();
 
             foreach (PlayerCommand command in inputHandler.Commands)
             {
@@ -56,7 +57,7 @@ namespace MazeGame.Core.GameObjects
                             world.GetNeighborsByCondition(Position, (tile) => tile.IsPassable);
                         if (availableDirections.Contains(directionToMove))
                         {
-                            MoveTo(directionToMove, world[Position + directionToMove].MoveCost);
+                            MoveTo(directionToMove, world[Position + directionToMove].MoveCost, framesPerSecond);
                         }
                         break;
                     case PlayerCommand.Attack:

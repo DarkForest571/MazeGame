@@ -34,20 +34,20 @@ namespace MazeGame.Core
             _world = new World(worldSize);
 
             Tile wall = new Tile('█', false);
-            Tile space = new Tile(' ', true, (int)(0.1 * framesPerSecond));
-            _finalHatch = new Tile('#', true, (int)(1.0 * framesPerSecond));
-            _grave = new Tile('†', true, (int)(0.25 * framesPerSecond));
+            Tile space = new Tile(' ', true, 0.5f);
+            _finalHatch = new Tile('#', true, 1.0f);
+            _grave = new Tile('†', true, 0.25f);
 
             //_generator = new MazeGenerator(_world, wall, space);
             _generator = new DefaultGenerator(_world, wall, space);
 
             // Entities, projectiles, entities and spawners
-            Projectile meleeAttack = new Projectile('/', 1, 0.2f, 15);
+            Projectile meleeAttack = new Projectile('\\', 1, 0.1f, 15);
             Projectile horizontalRangeAttack = new Projectile('-', 10, 0.2f, 10);
             Projectile verticalRangeAttack = new Projectile('|', 10, 0.2f, 10);
-            Player player = new Player('☻', meleeAttack, 100, 1f, 1f);
-            Zombie zombie = new Zombie('Z', meleeAttack, 150, 1f, 10);
-            Shooter shooter = new Shooter('S', horizontalRangeAttack, verticalRangeAttack, 75, 2f, 10);
+            Player player = new Player('☻', meleeAttack, 100, 10f, 0.01f);
+            Zombie zombie = new Zombie('Z', meleeAttack, 50, 1f, 10);
+            Shooter shooter = new Shooter('S', horizontalRangeAttack, verticalRangeAttack, 25, 2f, 10);
 
             _playerSpawner = new WorldwiseSpawner(_world, player, 1);
             _enemySpawners = new List<ISpawner>
@@ -136,6 +136,7 @@ namespace MazeGame.Core
                     }
                     if (CheckGameOverCondition())
                     {
+                        RestartLevel();
                         level = 1;
                     }
 
