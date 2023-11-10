@@ -7,5 +7,7 @@ namespace MazeGame.Core.GameLogic
         public void HandleAIState(World world, Vector2 playerPosition, bool canSeePlayer, int framesPerSecond);
 
         public void AIAction(World world, int framesPerSecond);
+
+        public int ViewDistance { get; }
     }
 }

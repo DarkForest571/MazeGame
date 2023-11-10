@@ -1,10 +1,4 @@
-﻿using MazeGame.Core.GameObjects;
-using MazeGame.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MazeGame.Utils;
 
 namespace MazeGame.Core.GameLogic
 {

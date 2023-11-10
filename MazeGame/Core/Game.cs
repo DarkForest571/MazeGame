@@ -41,15 +41,19 @@ namespace MazeGame.Core
             //_generator = new MazeGenerator(_world, wall, space);
             _generator = new DefaultGenerator(_world, wall, space);
 
-            // Entities, projectiles and spawners
+            // Entities, projectiles, entities and spawners
             Projectile meleeAttack = new Projectile('/');
             Projectile horizontalRangeAttack = new Projectile('/');
             Projectile verticalRangeAttack = new Projectile('/');
-            _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', meleeAttack), 1);
+            Player player = new Player('☻', meleeAttack);
+            Zombie zombie = new Zombie('Z', meleeAttack, 150, 2f, 10);
+            Shooter shooter = new Shooter('S', horizontalRangeAttack, verticalRangeAttack);
+
+            _playerSpawner = new WorldwiseSpawner(_world, player, 1);
             _enemySpawners = new List<ISpawner>
             {
-                new WorldwiseSpawner(_world, new Zombie('Z', meleeAttack, 1, 2f), 15),
-                new WorldwiseSpawner(_world, new Shooter('S', horizontalRangeAttack, verticalRangeAttack), 10)
+                new WorldwiseSpawner(_world, zombie, 15),
+                new WorldwiseSpawner(_world, shooter, 10)
             };
             _AIcontroller = new AIController(_world);
 

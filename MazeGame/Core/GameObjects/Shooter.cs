@@ -7,13 +7,12 @@ namespace MazeGame.Core.GameObjects
     {
         Projectile _horizontalAttackProjectile;
         Projectile _verticalAttackProjectile;
-        private Direction _attackDirection;
 
         public Shooter(char image,
                       Projectile horizontalAttackProjectile,
                       Projectile verticalAttackProjectile,
                       int health = 75,
-                      float moveSpeed = 1.25f,
+                      float moveSpeed = 1.5f,
                       Vector2 position = default) : base(image,
                                                          health,
                                                          moveSpeed,
@@ -21,7 +20,6 @@ namespace MazeGame.Core.GameObjects
         {
             _horizontalAttackProjectile = horizontalAttackProjectile;
             _verticalAttackProjectile = verticalAttackProjectile;
-            _attackDirection = Direction.Right;
 
             //_idleSecondsFrom = 1;
             //_idleSecondsTo = 3;
@@ -39,18 +37,19 @@ namespace MazeGame.Core.GameObjects
                                                        Position);
 
 
-        public override Projectile GetAttack()
+        public override Projectile? GetAttack()
         {
-            if (_attackDirection == Direction.Right || _attackDirection == Direction.Left)
-            {
-                _horizontalAttackProjectile.Position = Position + _attackDirection;
-                return _horizontalAttackProjectile.Clone();
-            }
-            else
-            {
-                _verticalAttackProjectile.Position = Position + _attackDirection;
-                return _verticalAttackProjectile.Clone();
-            }
+            return null;
+            //if (_attackDirection == Direction.Right || _attackDirection == Direction.Left)
+            //{
+            //    _horizontalAttackProjectile.Position = Position + _attackDirection;
+            //    return _horizontalAttackProjectile.Clone();
+            //}
+            //else
+            //{
+            //    _verticalAttackProjectile.Position = Position + _attackDirection;
+            //    return _verticalAttackProjectile.Clone();
+            //}
         }
     }
 }

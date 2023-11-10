@@ -5,20 +5,22 @@ namespace MazeGame.Core.GameObjects
 {
     sealed class Zombie : Entity, IAIControlable
     {
-        DefaultIdleState _idleState;
-        DefaultWanderingState _wanderingState;
-        ZombieAttackPreporationState _attackPreporationState;
-        ZombieAttackState _attackState;
-        DefaultFollowState _followState;
+        private DefaultIdleState _idleState;
+        private DefaultWanderingState _wanderingState;
+        private ZombieAttackPreporationState _attackPreporationState;
+        private ZombieAttackState _attackState;
+        private DefaultFollowState _followState;
 
         private AIState _AIState;
 
-        Projectile _attackProjectile;
+        private Projectile _attackProjectile;
+        private readonly int _viewDistanse;
 
         public Zombie(char zombieImage,
                       Projectile attackProjectile,
                       int health = 150,
                       float moveSpeed = 0.25f,
+                      int viewDistance = 10,
                       Vector2 position = default) : base(zombieImage,
                                                          health,
                                                          moveSpeed,
@@ -39,9 +41,12 @@ namespace MazeGame.Core.GameObjects
             _AIState = _idleState;
 
             _attackProjectile = attackProjectile;
+            _viewDistanse = viewDistance;
         }
 
-        public override Zombie Clone() => new Zombie(Image, _attackProjectile, Health, MoveSpeed, Position);
+        public int ViewDistance => _viewDistanse;
+
+        public override Zombie Clone() => new Zombie(Image, _attackProjectile, Health, MoveSpeed, _viewDistanse, Position);
 
         public void HandleAIState(World world, Vector2 playerPosition, bool canSeePlayer, int framesPerSecond)
         {

@@ -22,8 +22,9 @@ namespace MazeGame.Core.GameLogic
             {
                 if (entity is IAIControlable)
                 {
-                    bool canSee = EntityVisibility(_world, entity, _player, 10);
-                    ((IAIControlable)entity).HandleAIState(_world, _player.Position, canSee, framesPerSecond);
+                    IAIControlable AIEntity = (IAIControlable)entity;
+                    bool canSee = EntityVisibility(_world, entity, _player, AIEntity.ViewDistance);
+                    AIEntity.HandleAIState(_world, _player.Position, canSee, framesPerSecond);
                 }
             }
         }

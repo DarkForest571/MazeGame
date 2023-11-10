@@ -68,8 +68,8 @@ namespace MazeGame.Core.GameLogic
             List<Direction> availableDirection = world.GetNeighborsByCondition(entityPosition, (tile) => tile.IsPassable);
             if (availableDirection.Count > 0)
             {
-                int choise = Random.Shared.Next(availableDirection.Count);
-                _targetPosition = entityPosition + availableDirection[choise];
+                int choice = Random.Shared.Next(availableDirection.Count);
+                _targetPosition = entityPosition + availableDirection[choice];
             }
             else
             {
