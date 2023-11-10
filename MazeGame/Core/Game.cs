@@ -42,7 +42,7 @@ namespace MazeGame.Core
             _generator = new DefaultGenerator(_world, wall, space);
 
             // Entities, projectiles, entities and spawners
-            Projectile meleeAttack = new Projectile('/');
+            Projectile meleeAttack = new Projectile('/', 5, 5, 0);
             Projectile horizontalRangeAttack = new Projectile('/');
             Projectile verticalRangeAttack = new Projectile('/');
             Player player = new Player('☻', meleeAttack);
@@ -78,7 +78,7 @@ namespace MazeGame.Core
             _finalHatchPosition = _world.GetRandomPositionByCondition((tile) => tile.IsPassable);
             _world[_finalHatchPosition] = _finalHatch;
 
-            _world.ClearAllEntities();
+            _world.ClearAllGameObjects();
             _currentPlayer = (Player)_playerSpawner.SpawnOne();
             _AIcontroller.Player = _currentPlayer;
             foreach (ISpawner spawner in _enemySpawners)
@@ -137,7 +137,11 @@ namespace MazeGame.Core
         {
             _AIcontroller.UpdateAllAI(_framesPerSecond);
             _AIcontroller.ActionAllAI(_framesPerSecond);
+            _world.UpdateProjectiles(_framesPerSecond);
             UpdateEntities(_framesPerSecond);
+
+            _world.ClearDeadEntities();
+            _world.ClearDeadProjectile();
         }
 
         private void RenderScene()

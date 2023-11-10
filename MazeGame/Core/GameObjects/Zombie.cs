@@ -84,7 +84,8 @@ namespace MazeGame.Core.GameObjects
                     {
                         Projectile projectile = GetAttack();
                         projectile.Position = Position + state.AttackDirection;
-                        // Add in world;
+                        projectile.Init(state.AttackDirection, framesPerSecond);
+                        world.AddProjectile(projectile);
                     }
                     break;
                 case FollowState state:

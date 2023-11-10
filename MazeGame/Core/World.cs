@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-using MazeGame.Core.GameObjects;
+﻿using MazeGame.Core.GameObjects;
 using MazeGame.Utils;
 
 namespace MazeGame.Core
@@ -11,6 +9,7 @@ namespace MazeGame.Core
 
         private Tile[,] _tileMap;
         private List<Entity> _entities;
+        private List<Projectile> _projectiles;
 
         public World(Vector2 worldSize)
         {
@@ -21,11 +20,14 @@ namespace MazeGame.Core
 
             _tileMap = new Tile[worldSize.X, worldSize.Y];
             _entities = new List<Entity>();
+            _projectiles = new List<Projectile>();
         }
 
         public Vector2 Size { get => _worldSize; }
 
         public IEnumerable<Entity> Entities => _entities;
+
+        public IEnumerable<Projectile> Projectiles => _projectiles;
 
         public Tile this[int x, int y]
         {
@@ -47,14 +49,38 @@ namespace MazeGame.Core
                 throw new ArgumentException();
         }
 
+        public void AddProjectile(Projectile projectile)
+        {
+            if (InBounds(projectile.Position))
+                _projectiles.Add(projectile);
+            else
+                throw new ArgumentException();
+        }
+
         public void ClearDeadEntities()
         {
             _entities.RemoveAll((entity) => entity.Health <= 0);
         }
 
-        public void ClearAllEntities()
+        public void ClearAllGameObjects()
         {
             _entities.Clear();
+            _projectiles.Clear();
+        }
+
+        public void UpdateProjectiles(int framesPerSecond)
+        {
+            foreach (Projectile projectile in _projectiles)
+            {
+                projectile.Update(framesPerSecond);
+                if (!this[projectile.Position].IsPassable)
+                    projectile.Destroy();
+            }
+        }
+
+        public void ClearDeadProjectile()
+        {
+            _projectiles.RemoveAll((projectile) => projectile.IsDead);
         }
 
         public List<Direction> GetNeighborsByCondition(Vector2 position, Func<Tile, bool> condition)
