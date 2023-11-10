@@ -10,19 +10,19 @@ namespace MazeGame.Core.GameObjects
 
         public Player(char playerImage,
                       Projectile attackProjectile,
-                       Vector2 position = default,
                       int health = 100,
-                      float moveSpeed = 1.0f) : base(playerImage,
-                                                     position,
+                      float moveSpeed = 1.0f,
+                       Vector2 position = default) : base(playerImage,
                                                      health,
-                                                     moveSpeed)
+                                                     moveSpeed,
+                                                     position)
         {
             _attackProjectile = attackProjectile;
             _attackDirection = Direction.Right;
             _attackTimer = 0;
         }
 
-        public override Player Clone() => new Player(Image, _attackProjectile, Position, Health, MoveSpeed);
+        public override Player Clone() => new Player(Image, _attackProjectile, Health, MoveSpeed, Position);
 
         public override Projectile? GetAttack()
         {

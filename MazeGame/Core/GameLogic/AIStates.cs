@@ -53,6 +53,8 @@ namespace MazeGame.Core.GameLogic
 
         protected WanderingState() { }
 
+        public Vector2 TargetPosition => _targetPosition;
+
         public abstract AIState? HandleAIState(World world,
                                                Vector2 entityPosition,
                                                Vector2 playerPosition,
@@ -79,9 +81,11 @@ namespace MazeGame.Core.GameLogic
     abstract class AttackPreporationState : AIState
     {
         protected Vector2 _attackPosition;
-        protected Vector2 _playerPosition;
+        protected Vector2 _lastPlayerPosition;
 
         protected AttackPreporationState() { }
+
+        public Vector2 AttackPosition => _attackPosition;
 
         public abstract AIState? HandleAIState(World world,
                                                Vector2 entityPosition,
@@ -94,7 +98,7 @@ namespace MazeGame.Core.GameLogic
         public virtual void InitState(World world, Vector2 entityPosition, Vector2 playerPosition)
         {
             _attackPosition = playerPosition + Vector2.GetDirection(playerPosition, entityPosition);
-            _playerPosition = playerPosition;
+            _lastPlayerPosition = playerPosition;
         }
     }
 
@@ -102,8 +106,9 @@ namespace MazeGame.Core.GameLogic
     {
         protected float _secondsPerAttck;
         protected int _attackTimer;
+        protected Direction _attackDirection;
 
-        protected Vector2 _playerPosition;
+        protected Vector2 _lastPlayerPosition;
 
         protected AttackState(float secondsRerAttack)
         {
@@ -111,17 +116,26 @@ namespace MazeGame.Core.GameLogic
             _secondsPerAttck = secondsRerAttack;
         }
 
+        public bool ReadyForAttck => _attackTimer == 0;
+
+        public Direction AttackDirection => _attackDirection;
+
         public abstract AIState? HandleAIState(World world,
                                                Vector2 entityPosition,
                                                Vector2 playerPosition,
                                                bool canSeePlayer,
                                                int framesPerSecond);
 
-        public void Update() { }
-
-        public virtual void InitState(Vector2 playerPosition, int framesPerSecond)
+        public void Update()
         {
-            _playerPosition = playerPosition;
+            if (_attackTimer > 0)
+                _attackTimer--;
+        }
+
+        public virtual void InitState(Vector2 entityPosition, Vector2 playerPosition, int framesPerSecond)
+        {
+            _lastPlayerPosition = playerPosition;
+            _attackDirection = Vector2.GetDirection(entityPosition, playerPosition);
             _attackTimer = (int)(_secondsPerAttck * framesPerSecond);
         }
     }
@@ -131,6 +145,8 @@ namespace MazeGame.Core.GameLogic
         protected Vector2 _lastPlayerPosition;
 
         protected FollowState() { }
+
+        public Vector2 LastPlayerPosition => _lastPlayerPosition;
 
         public abstract AIState? HandleAIState(World world,
                                                Vector2 entityPosition,

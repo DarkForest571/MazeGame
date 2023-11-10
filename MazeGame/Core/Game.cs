@@ -38,8 +38,8 @@ namespace MazeGame.Core
             _finalHatch = new Tile('#', true, (int)(1.0 * framesPerSecond));
             _grave = new Tile('†', true, (int)(0.25 * framesPerSecond));
 
-            _generator = new MazeGenerator(_world, wall, space);
-            //_generator = new DefaultGenerator(_world, wall, space);
+            //_generator = new MazeGenerator(_world, wall, space);
+            _generator = new DefaultGenerator(_world, wall, space);
 
             // Entities, projectiles and spawners
             Projectile meleeAttack = new Projectile('/');
@@ -48,7 +48,7 @@ namespace MazeGame.Core
             _playerSpawner = new WorldwiseSpawner(_world, new Player('☻', meleeAttack), 1);
             _enemySpawners = new List<ISpawner>
             {
-                new WorldwiseSpawner(_world, new Zombie('Z', meleeAttack), 15),
+                new WorldwiseSpawner(_world, new Zombie('Z', meleeAttack, 1, 2f), 15),
                 new WorldwiseSpawner(_world, new Shooter('S', horizontalRangeAttack, verticalRangeAttack), 10)
             };
             _AIcontroller = new AIController(_world);
@@ -132,6 +132,7 @@ namespace MazeGame.Core
         private void UpdateScene()
         {
             _AIcontroller.UpdateAllAI(_framesPerSecond);
+            _AIcontroller.ActionAllAI(_framesPerSecond);
             UpdateEntities(_framesPerSecond);
         }
 

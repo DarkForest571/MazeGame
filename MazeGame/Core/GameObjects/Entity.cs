@@ -11,9 +11,9 @@ namespace MazeGame.Core.GameObjects
         private int _health;
 
         public Entity(char entityImage,
-                      Vector2 position,
                       int health,
-                      float moveSpeed) : base(entityImage)
+                      float moveSpeed,
+                      Vector2 position) : base(entityImage)
         {
             _position = position;
             _moveSpeed = Math.Max(moveSpeed, 0.1f);

@@ -12,12 +12,12 @@ namespace MazeGame.Core.GameObjects
         public Shooter(char image,
                       Projectile horizontalAttackProjectile,
                       Projectile verticalAttackProjectile,
-                      Vector2 position = default,
                       int health = 75,
-                      float moveSpeed = 1.25f) : base(image,
-                                                      position,
-                                                      health,
-                                                      moveSpeed)
+                      float moveSpeed = 1.25f,
+                      Vector2 position = default) : base(image,
+                                                         health,
+                                                         moveSpeed,
+                                                         position)
         {
             _horizontalAttackProjectile = horizontalAttackProjectile;
             _verticalAttackProjectile = verticalAttackProjectile;
@@ -34,12 +34,12 @@ namespace MazeGame.Core.GameObjects
         public override Shooter Clone() => new Shooter(Image,
                                                        _horizontalAttackProjectile,
                                                        _verticalAttackProjectile,
-                                                       Position,
                                                        Health,
-                                                       MoveSpeed);
+                                                       MoveSpeed,
+                                                       Position);
 
 
-        public override Projectile? GetAttack()
+        public override Projectile GetAttack()
         {
             if (_attackDirection == Direction.Right || _attackDirection == Direction.Left)
             {

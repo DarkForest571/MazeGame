@@ -1,4 +1,5 @@
-﻿using MazeGame.Utils;
+﻿using MazeGame.Core.GameObjects;
+using MazeGame.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace MazeGame.Core.GameLogic
 {
-    class ZombieIdleState : IdleState
+    class DefaultIdleState : IdleState
     {
         private WanderingState _nextWanderingState;
         private AttackPreporationState _nextPreporationState;
 
-        public ZombieIdleState(float idleSecondsFrom,
+        public DefaultIdleState(float idleSecondsFrom,
                                float idleSecondsTo) : base(idleSecondsFrom,
                                                            idleSecondsTo)
         { }
@@ -29,18 +30,29 @@ namespace MazeGame.Core.GameLogic
                                                bool canSeePlayer,
                                                int framesPerSecond)
         {
-            throw new NotImplementedException();
+            if (canSeePlayer)
+            {
+                _nextPreporationState.InitState(world, entityPosition, playerPosition);
+                return _nextPreporationState;
+            }
+
+            if (_idleFramesTimer == 0)
+            {
+                _nextWanderingState.InitState(world, entityPosition);
+                return _nextWanderingState;
+            }
+            return null;
         }
 
-        
+
     }
 
-    class ZombieWanderingState : WanderingState
+    class DefaultWanderingState : WanderingState
     {
         private IdleState _nextIdleState;
         private AttackPreporationState _nextPreporationState;
 
-        public ZombieWanderingState() { }
+        public DefaultWanderingState() { }
 
         public void SetNextStates(IdleState idleState, AttackPreporationState attackPreporationState)
         {
@@ -54,7 +66,18 @@ namespace MazeGame.Core.GameLogic
                                                bool canSeePlayer,
                                                int framesPerSecond)
         {
-            throw new NotImplementedException();
+            if (canSeePlayer)
+            {
+                _nextPreporationState.InitState(world, entityPosition, playerPosition);
+                return _nextPreporationState;
+            }
+
+            if (entityPosition == _targetPosition)
+            {
+                _nextIdleState.InitState(framesPerSecond);
+                return _nextIdleState;
+            }
+            return null;
         }
     }
 
@@ -77,7 +100,24 @@ namespace MazeGame.Core.GameLogic
                                                bool canSeePlayer,
                                                int framesPerSecond)
         {
-            throw new NotImplementedException();
+            if (!canSeePlayer)
+            {
+                _nextFollowState.InitState(_lastPlayerPosition);
+                return _nextFollowState;
+            }
+
+            if (playerPosition != _lastPlayerPosition)
+            {
+                InitState(world, entityPosition, playerPosition);
+                return this;
+            }
+
+            if (entityPosition == _attackPosition)
+            {
+                _nextAttackState.InitState(entityPosition, playerPosition, framesPerSecond);
+                return _nextAttackState;
+            }
+            return null;
         }
     }
 
@@ -86,8 +126,7 @@ namespace MazeGame.Core.GameLogic
         private AttackPreporationState _nextPreporationState;
         private FollowState _nextFollowState;
 
-        public ZombieAttackState(float secondsRerAttack) : base(secondsRerAttack)
-        { }
+        public ZombieAttackState(float secondsRerAttack) : base(secondsRerAttack) { }
 
         public void SetNextStates(AttackPreporationState attackPreporationState, FollowState followState)
         {
@@ -101,16 +140,34 @@ namespace MazeGame.Core.GameLogic
                                                bool canSeePlayer,
                                                int framesPerSecond)
         {
-            throw new NotImplementedException();
+            if (!canSeePlayer)
+            {
+                _nextFollowState.InitState(_lastPlayerPosition);
+                return _nextFollowState;
+            }
+
+            if (playerPosition != _lastPlayerPosition)
+            {
+                _nextPreporationState.InitState(world, entityPosition, playerPosition);
+                return _nextPreporationState;
+            }
+
+            if(_attackTimer == 0)
+            {
+                InitState(entityPosition, playerPosition, framesPerSecond);
+                return this;
+            }
+            return null;
         }
+
     }
 
-    class ZombieFollowState : FollowState
+    class DefaultFollowState : FollowState
     {
         private AttackPreporationState _nextPreporationState;
         private IdleState _nextIdleState;
 
-        public ZombieFollowState() { }
+        public DefaultFollowState() { }
 
         public void SetNextStates(AttackPreporationState attackPreporationState, IdleState idleState)
         {
@@ -124,7 +181,18 @@ namespace MazeGame.Core.GameLogic
                                                bool canSeePlayer,
                                                int framesPerSecond)
         {
-            throw new NotImplementedException();
+            if (canSeePlayer)
+            {
+                _nextPreporationState.InitState(world, entityPosition, playerPosition);
+                return _nextPreporationState;
+            }
+
+            if (entityPosition == _lastPlayerPosition)
+            {
+                _nextIdleState.InitState(framesPerSecond);
+                return _nextIdleState;
+            }
+            return null;
         }
     }
 }

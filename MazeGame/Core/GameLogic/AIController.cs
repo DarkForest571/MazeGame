@@ -28,13 +28,13 @@ namespace MazeGame.Core.GameLogic
             }
         }
 
-        public void ActionAllAI()
+        public void ActionAllAI(int framesPerSecond)
         {
             foreach (Entity entity in _world.Entities)
             {
                 if (entity is IAIControlable)
                 {
-
+                    ((IAIControlable)entity).AIAction(_world, framesPerSecond);
                 }
             }
         }

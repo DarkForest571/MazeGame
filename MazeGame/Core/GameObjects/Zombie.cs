@@ -5,39 +5,43 @@ namespace MazeGame.Core.GameObjects
 {
     sealed class Zombie : Entity, IAIControlable
     {
-        private readonly Projectile _attackProjectile;
-        private Direction _attackDirection;
+        DefaultIdleState _idleState;
+        DefaultWanderingState _wanderingState;
+        ZombieAttackPreporationState _attackPreporationState;
+        ZombieAttackState _attackState;
+        DefaultFollowState _followState;
 
         private AIState _AIState;
 
+        Projectile _attackProjectile;
+
         public Zombie(char zombieImage,
                       Projectile attackProjectile,
-                      Vector2 position = default,
                       int health = 150,
-                      float moveSpeed = 0.25f) : base(zombieImage,
-                                                      position,
-                                                      health,
-                                                      moveSpeed)
+                      float moveSpeed = 0.25f,
+                      Vector2 position = default) : base(zombieImage,
+                                                         health,
+                                                         moveSpeed,
+                                                         position)
         {
+            _idleState = new DefaultIdleState(1, 3);
+            _wanderingState = new DefaultWanderingState();
+            _attackPreporationState = new ZombieAttackPreporationState();
+            _attackState = new ZombieAttackState(1);
+            _followState = new DefaultFollowState();
+
+            _idleState.SetNextStates(_wanderingState, _attackPreporationState);
+            _wanderingState.SetNextStates(_idleState, _attackPreporationState);
+            _attackPreporationState.SetNextStates(_followState, _attackState);
+            _attackState.SetNextStates(_attackPreporationState, _followState);
+            _followState.SetNextStates(_attackPreporationState, _idleState);
+
+            _AIState = _idleState;
+
             _attackProjectile = attackProjectile;
-            _attackDirection = Direction.Right;
-
-            ZombieIdleState idleState = new ZombieIdleState(1, 3);
-            ZombieWanderingState wanderingState = new ZombieWanderingState();
-            ZombieAttackPreporationState attackPreporationState = new ZombieAttackPreporationState();
-            ZombieAttackState attackState = new ZombieAttackState(1);
-            ZombieFollowState followState = new ZombieFollowState();
-
-            idleState.SetNextStates(wanderingState, attackPreporationState);
-            wanderingState.SetNextStates(idleState, attackPreporationState);
-            attackPreporationState.SetNextStates(followState, attackState);
-            attackState.SetNextStates(attackPreporationState, followState);
-            followState.SetNextStates(attackPreporationState, idleState);
-
-            _AIState = idleState;
         }
 
-        public override Zombie Clone() => new Zombie(Image, _attackProjectile, Position, Health, MoveSpeed);
+        public override Zombie Clone() => new Zombie(Image, _attackProjectile, Health, MoveSpeed, Position);
 
         public void HandleAIState(World world, Vector2 playerPosition, bool canSeePlayer, int framesPerSecond)
         {
@@ -46,10 +50,44 @@ namespace MazeGame.Core.GameObjects
                 _AIState = newState;
         }
 
-        public override Projectile? GetAttack()
+        public override Projectile GetAttack()
         {
-            _attackProjectile.Position = Position + _attackDirection;
             return _attackProjectile.Clone();
+        }
+
+        public void AIAction(World world, int framesPerSecond)
+        {
+            Direction direction;
+            switch (_AIState)
+            {
+                case IdleState:
+                    _AIState.Update();
+                    break;
+                case WanderingState state:
+                    UpdateMoveTimer();
+                    direction = Vector2.GetDirection(Position, state.TargetPosition);
+                    MoveTo(direction, framesPerSecond);
+                    break;
+                case AttackPreporationState state:
+                    UpdateMoveTimer();
+                    direction = Vector2.GetDirection(Position, state.AttackPosition);
+                    MoveTo(direction, framesPerSecond);
+                    break;
+                case AttackState state:
+                    _AIState.Update();
+                    if (state.ReadyForAttck)
+                    {
+                        Projectile projectile = GetAttack();
+                        projectile.Position = Position + state.AttackDirection;
+                        // Add in world;
+                    }
+                    break;
+                case FollowState state:
+                    UpdateMoveTimer();
+                    direction = Vector2.GetDirection(Position, state.LastPlayerPosition);
+                    MoveTo(direction, framesPerSecond);
+                    break;
+            }
         }
     }
 }
