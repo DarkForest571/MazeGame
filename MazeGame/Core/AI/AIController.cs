@@ -51,16 +51,16 @@ namespace MazeGame.Core.GameLogic
             if (viewer.Position.X == target.Position.X)
             {
                 (from, to) =
-                    target.Position.Y <= target.Position.Y
-                    ? (target.Position, target.Position)
-                    : (target.Position, target.Position);
+                    target.Position.Y <= viewer.Position.Y
+                    ? (target.Position, viewer.Position)
+                    : (viewer.Position, target.Position);
                 deltaStep = Direction.Down;
             }
             else if (viewer.Position.Y == target.Position.Y)
             {
                 (from, to) =
-                    target.Position.X <= target.Position.X
-                    ? (target.Position, target.Position)
+                    target.Position.X <= viewer.Position.X
+                    ? (target.Position, viewer.Position)
                     : (viewer.Position, target.Position);
                 deltaStep = Direction.Right;
             }
