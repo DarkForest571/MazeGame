@@ -38,8 +38,8 @@ namespace MazeGame.Core
             _finalHatch = new Tile('#', true, 1.0f);
             _grave = new Tile('†', true, 0.25f);
 
-            //_generator = new MazeGenerator(_world, wall, space);
-            _generator = new DefaultGenerator(_world, wall, space);
+            _generator = new MazeGenerator(_world, wall, space);
+            //_generator = new DefaultGenerator(_world, wall, space);
 
             // Entities, projectiles, entities and spawners
             Projectile meleeAttack = new Projectile('\\', 1, 0.1f, 15);
